@@ -1,0 +1,50 @@
+---
+Name: mysite
+After:
+  - 'framework/*'
+  - 'cms/*'
+---
+# YAML configuration for SilverStripe
+# See http://doc.silverstripe.org/framework/en/topics/configuration
+# Caution: Indentation through two spaces, not tabs
+File:
+    allowed_extensions:
+        - svg
+Image:
+    allowed_extensions:
+        - svg
+SSViewer:
+  theme: 'simple'
+
+SiteConfig:
+  extensions:
+    - SiteConfig_Extension
+
+SiteTree:
+  extensions:
+    - SiteTree_Extension
+
+Page:
+  extensions:
+    - AdvancedWidgetPageExtension
+
+Blog:
+  extensions:
+    - Blog_Extension
+BlogPost:
+  extensions:
+    - BlogPost_Extension
+BlogPost_Controller:
+  extensions:
+    - BlogPost_Controller_Extension
+BlogCategory:
+  extensions:
+    - BlogCategory_Extension
+
+Member:
+  extensions:
+    - Member_Extension
+
+Block:
+  extensions:
+    - Block_Extension
