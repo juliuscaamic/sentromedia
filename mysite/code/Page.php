@@ -35,7 +35,7 @@ class Page_Controller extends ContentController {
 		Requirements::javascript('themes/reen/js/owl.carousel.min.js');
 		Requirements::javascript('themes/reen/js/jquery.isotope.min.js');
 		Requirements::javascript('themes/reen/js/jquery.easytabs.min.js');
-		//Requirements::javascript('https://maps.googleapis.com/maps/api/js?key=AIzaSyD0jji5gjOj_ImX4uSgNd0dwIy09yL7kbQ');
+		Requirements::javascript('https://maps.googleapis.com/maps/api/js?key=AIzaSyD0jji5gjOj_ImX4uSgNd0dwIy09yL7kbQ');
 		Requirements::javascript('themes/reen/js/viewport-units-buggyfill.js');
 		Requirements::javascript('themes/reen/js/scripts.js');
 	}

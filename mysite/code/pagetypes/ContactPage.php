@@ -30,16 +30,18 @@ class ContactPage_Controller extends GenericPage_Controller {
 		parent::init();
 
 		$blockMap = $this->getBlockMap();
-		$title = $blockMap->RegionalOffices()->First()->Title;
-		$lat = $blockMap->RegionalOffices()->First()->GoogleMapLat;
-		$long = $blockMap->RegionalOffices()->First()->GoogleMapLong;
+		if ($blockMap) {
+			$title = $blockMap->RegionalOffices()->First()->Title;
+			$lat = $blockMap->RegionalOffices()->First()->GoogleMapLat;
+			$long = $blockMap->RegionalOffices()->First()->GoogleMapLong;
 
-		Requirements::customScript(<<<JS
-			var googleMapTitle = '$title';
-			var googleLat = '$lat';
-			var googleLong = '$long';
+			Requirements::customScript(<<<JS
+				var googleMapTitle = '$title';
+				var googleLat = '$lat';
+				var googleLong = '$long';
 JS
-		);
+			);			
+		}
 	}
 
 	/**

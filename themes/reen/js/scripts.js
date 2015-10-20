@@ -769,7 +769,7 @@ $(document).ready(function () {
 /*	GOOGLE MAPS
 /*===================================================================================*/
 
-/*$(document).ready(function () {
+$(document).ready(function () {
 	if (typeof googleLat != 'undefined' || typeof googleLat != 'undefined') {
 		function initialize() {
 			var theme = [
@@ -995,7 +995,7 @@ $(document).ready(function () {
 			initialize();
 		});
 	};
-});*/
+});
 
 
 /*===================================================================================*/
