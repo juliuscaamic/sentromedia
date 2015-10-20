@@ -30,10 +30,15 @@ class ContactPage_Controller extends GenericPage_Controller {
 		parent::init();
 
 		$blockMap = $this->getBlockMap();
+		$title = '';
+		$lat = '';
+		$long = '';
 		if ($blockMap) {
-			$title = $blockMap->RegionalOffices()->First()->Title;
-			$lat = $blockMap->RegionalOffices()->First()->GoogleMapLat;
-			$long = $blockMap->RegionalOffices()->First()->GoogleMapLong;
+			if ($blockMap->RegionalOffices()->First()) {
+				$title = $blockMap->RegionalOffices()->First()->Title;
+				$lat = $blockMap->RegionalOffices()->First()->GoogleMapLat;
+				$long = $blockMap->RegionalOffices()->First()->GoogleMapLong;
+			}
 
 			Requirements::customScript(<<<JS
 				var googleMapTitle = '$title';
