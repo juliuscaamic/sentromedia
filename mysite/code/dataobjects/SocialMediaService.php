@@ -13,7 +13,7 @@ class SocialMediaService extends DataObject {
 	 */
 	private static $db = array(
 		'Title' => 'Varchar', 
-		'SocialMediaServices' => "Enum(array('Facebook', 'Twitter', 'Google+', 'Instagram', 'Vine', 'LinkedIn', 'Pinterest', 'RSS'))",
+		'SocialMediaServices' => "Enum(array('Facebook', 'Twitter', 'Google+', 'Instagram', 'Vine', 'Youtube', 'LinkedIn', 'Pinterest', 'RSS'))",
 		'ExternalURL' => 'Varchar(2083)', 
 		'SortOrder' => 'Int'
 	);

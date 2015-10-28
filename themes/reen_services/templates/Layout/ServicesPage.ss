@@ -19,7 +19,7 @@
 				<div class="row inner-top-md">
 					
 					<div class="col-sm-6 <% if $Odd %>inner-right-xs text-right<% else %>col-sm-push-6 inner-left-xs<% end_if %>">
-						<figure><img src="$Image.Link" alt="$FeaturedImage.Title"></figure>
+						<figure><img src="$Image.PaddedImage(555, 380).Link" alt="$FeaturedImage.Title"></figure>
 					</div>
 					
 					<div class="col-sm-6 text-justify <% if $Odd %>inner-top-xs inner-left-xs<% else %>col-sm-pull-6 inner-top-xs inner-right-xs<% end_if %>">

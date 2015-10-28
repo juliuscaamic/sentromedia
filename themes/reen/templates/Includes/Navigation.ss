@@ -2,7 +2,7 @@
 	<% loop $Menu(1) %>
 		<% if $MegaMenu %>
 			<li class="dropdown yamm-fullwidth $LinkingMode">
-				<a href="$Link" title="Go to $Title.XML page" class="dropdown-toggle js-activated">$MenuTitle.XML</a>
+				<a href="javascript:void(0);" title="Go to $Title.XML page" class="dropdown-toggle js-activated">$MenuTitle.XML</a>
 				<ul class="dropdown-menu yamm-dropdown-menu">
 					<li>
 						<div class="yamm-content row">

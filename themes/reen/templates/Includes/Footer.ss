@@ -54,6 +54,13 @@
 									<% if $SocialMediaServices == 'Pinterest' %>
 										<i class="icon-s-pinterest"></i>
 									<% end_if %>
+									<% if $SocialMediaServices == 'Instagram' %>
+										<i class="icon-s-instagrem"></i>
+									<% end_if %>
+									<% if $SocialMediaServices == 'Youtube' %>
+										<i class="icon-s-youtube"></i>
+									<% end_if %>
+
 								</a>
 							</li>
 						<% end_loop %>

@@ -2021,9 +2021,11 @@ p .btn {
     background: #015A86;
 }
 .social a .icon-s-instagrem:after {
-    background: #125688;
+    background: #735B45;
 }
-
+.social a .icon-s-youtube:after {
+    background: #CC181E;
+}
 /*===================================================================================*/
 /*	TABS ON SIDE
 /*===================================================================================*/
