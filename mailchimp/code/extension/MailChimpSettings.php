@@ -16,4 +16,13 @@ class MailChimpSettings extends DataExtension {
 		$listField = new GridField('MailChimpList', 'MailChimp list', $this->owner->MailChimpList(), GridFieldConfig_RelationEditor::create());
 		$fields->addFieldToTab('Root.MailChimp', $listField);
 	}
+
+	/**
+	 * Get newsletter
+	 * 
+	 * @return MailChimpList
+	 */
+	public function getNewsletterList() {
+		return MailChimpList::get()->filter(array('Code' => 'NEWSLETTER'))->First();
+	}
 }

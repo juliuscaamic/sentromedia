@@ -66,7 +66,10 @@
 						<% end_loop %>
 					</ul>	
 				<% end_if %>
-				<p>Conecus iure posae volor remped modis aut lor volor accabora incim resto explabo.</p>
+
+				<% if $SiteConfig.NewsletterList.Text %>
+					<p>$SiteConfig.NewsletterList.Text</p>
+				<% end_if %>
 				$MailChimpForm
 			</div>
 			

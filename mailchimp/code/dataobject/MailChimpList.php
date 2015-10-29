@@ -2,7 +2,8 @@
 class MailChimpList extends DataObject {
 
 	private static $db = array(
-		'Title' => 'Varchar',
+		'Title' => 'Varchar', 
+		'Text' => 'Text', 
 		'ListID' => 'Varchar',
 		'Code' => 'Varchar'		
 	);
