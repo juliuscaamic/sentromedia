@@ -27,14 +27,31 @@ class Work extends Blog {
 
 		$fields->removeByName('Widgets');
 
-		$fields->fieldByName('Root')
-			->fieldByName('ChildPages')
-			->setTitle('Portfolios');
+		$source = WorkPage::get();
+		$list = $fields->dataFieldByName('ChildPages')
+			->setList($source);
+
 		$fields->dataFieldByName('ChildPages')
-			->setTitle('Portfolios');
+			->getConfig()
+			->addComponent(new GridFieldSortableRows('SortOrder'));
+
+		$fields->dataFieldByName('ChildPages')
+			->setTitle('Portfolios')
+			->getConfig()
+			->getComponentByType('GridFieldPaginator')
+			->setItemsPerPage(100);
 
 		return $fields;
 	}
+
+	/**
+	 * Get posts
+	 * 
+	 * @return DataList
+	 */
+	public function getBlogPosts() {
+		return WorkPage::get()->filter("ParentID", $this->ID);
+	}		
 }
 
 class Work_Controller extends Blog_Controller {

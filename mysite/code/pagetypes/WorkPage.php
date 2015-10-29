@@ -17,7 +17,8 @@ class WorkPage extends BlogPost {
 		'WebsiteAddress' => 'Text', 
 		'ActionBoxTitle' => 'Text', 
 		'ActionBoxContent' => 'HTMLText', 
-		'ActionBoxRedirectButtonText' => 'Varchar'
+		'ActionBoxRedirectButtonText' => 'Varchar', 
+		'SortOrder' => 'Int'
 	);
 
 	/**
@@ -58,6 +59,13 @@ class WorkPage extends BlogPost {
 	 * @var string
 	 */
 	private static $plural_name = 'Porfolios';
+
+	/**
+	 * Set default sort
+	 * 
+	 * @var string
+	 */
+	private static $default_sort = 'SortOrder';
 
 	/**
 	 * Get CMS fields
