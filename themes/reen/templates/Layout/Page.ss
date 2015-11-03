@@ -17,7 +17,7 @@
 			<% end_if %>
 
 			<% if $ClassName == 'BlockBanner' %>
-				<section id="hero" class="img-bg-bottom img-bg-soft tint-bg" style="<% if $Image %>background-image: url($Image.Link);<% end_if %>">
+				<section id="hero" class="img-bg-bottom light-bg img-bg-softer" style="<% if $Image %>background-image: url($Image.Link);<% end_if %>">
 					<div class="container inner">
 						<div class="row">
 							<div class="col-sm-10">
@@ -183,23 +183,23 @@
 			<% end_if %>
 
 			<% if $ClassName == 'BlockActionBox' %>
-				<section id="get-in-touch" class="inner-bottom inner-top">
-					<div class="container inner light-bg">
+				<section id="pattern-background-2" class="tint-bg img-bg-softer" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
+					<div class="container">
 						<div class="row">
-							<% loop $ActionBoxes %>
-								<div class="col-md-8 col-sm-9 center-block text-center">
-									<header>
-										<h1>$Title</h1>
-										$Content
-									</header>
-									<% if $RedirectPage %>
-										<a href="$RedirectPage.Link" title="Go to $RedirectPage.Title" class="btn btn-large">$ButtonText</a>
-									<% end_if %>
-								</div>
-							<% end_loop %>
+							<div class="col-md-8 col-sm-9 inner center-block text-center">
+								<header>
+									<h1>$ActionBoxes.First.Title</h1>
+									$ActionBoxes.First.Content
+								</header>
+
+								<% if $ActionBoxes.First.RedirectPage %>
+									<a href="$ActionBoxes.First.RedirectPage.Link" title="Go to $ActionBoxes.First.RedirectPage.Title" class="btn btn-large">$ActionBoxes.First.ButtonText</a>
+								<% end_if %>
+
+							</div>
 						</div>
 					</div>
-				</section>			
+				</section>
 			<% end_if %>
 
 			<% if $ClassName == 'BlockCarousel' %>

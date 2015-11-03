@@ -7,7 +7,8 @@ class ServicesPage extends Page {
 	);
 
 	private static $has_one = array(
-		'FeaturedImage' => 'Image'
+		'FeaturedImage' => 'Image', 
+		'HeaderImage' => 'Image'
 	);
 
 	private static $has_many = array(
@@ -45,7 +46,12 @@ class ServicesPage extends Page {
 				GridFieldConfig_RecordEditor::create()
 					->addComponent(new GridFieldSortableRows('SortOrder'))
 			)
-		);		
+		);
+
+		$fields->addFieldToTab(
+			'Root.Main', 
+			UploadField::create('HeaderImage', 'Header image')
+		);
 
 		return $fields;
 	}

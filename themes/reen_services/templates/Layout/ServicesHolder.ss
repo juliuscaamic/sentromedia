@@ -15,12 +15,14 @@
 				<% loop $Children %>
 					<div class="col-sm-2">
 						<div class="icon pull-right">
-							<img src="$FeaturedImage.Link" alt="$FeaturedImage.Title" />
+							<a href="$Link" title="Go to $Title.XML page">
+								<img src="$FeaturedImage.Link" alt="$FeaturedImage.Title" />
+							</a>
 						</div>
 					</div>
 
 					<div class="col-sm-4 inner-bottom-sm">
-						<h2>$FeaturedTitle</h2>
+						<h2><a href="$Link" title="Go to $Title.XML page">$FeaturedTitle</a></h2>
 						$FeaturedContent
 						<a href="$Link" title="Go to $Title page" class="btn btn-md">Learn More</a>
 					</div>

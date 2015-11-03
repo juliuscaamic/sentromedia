@@ -26,7 +26,8 @@ class ActionBox extends DataObject {
 	 */
 	private static $has_one = array(
 		'ActionBoxParent' => 'BlockActionBox', 
-		'RedirectPage' => 'SiteTree'
+		'RedirectPage' => 'SiteTree', 
+		'BackgroundImage' => 'Image'
 	);
 
 	/**
@@ -64,11 +65,14 @@ class ActionBox extends DataObject {
 			->setRows(20);
 		$fields->dataFieldByName('ButtonText')
 			->setTitle('Redirect button text');
+		$fields->dataFieldByName('BackgroundImage')
+			->setFolderName('ActionBoxes');
 
 		$fields->replaceField(
 			'RedirectPageID', 
 			TreedropdownField::create('RedirectPageID', 'Redirect page', 'SiteTree')
 		);
+
 
 		return $fields;
 	}
