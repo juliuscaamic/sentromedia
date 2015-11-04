@@ -16,13 +16,14 @@
 	<section id="product">
 		<div class="container inner">
 			<% loop $Features %>			
-				<div class="row inner-top-md">
+				<div class="row <% if $BackgroundColour %>outer-top-md inner-bottom-md<% else %>inner-top-md<% end_if %>" <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>
+					<% if $Image %>
+						<div class="col-sm-6 <% if $Odd %>inner-right-xs text-right<% else %>col-sm-push-6 inner-left-xs<% end_if %>">
+							<figure><img src="$Image.PaddedImage(555, 380).Link" alt="$FeaturedImage.Title"></figure>
+						</div>
+					<% end_if %>
 					
-					<div class="col-sm-6 <% if $Odd %>inner-right-xs text-right<% else %>col-sm-push-6 inner-left-xs<% end_if %>">
-						<figure><img src="$Image.PaddedImage(555, 380).Link" alt="$FeaturedImage.Title"></figure>
-					</div>
-					
-					<div class="col-sm-6 text-justify <% if $Odd %>inner-top-xs inner-left-xs<% else %>col-sm-pull-6 inner-top-xs inner-right-xs<% end_if %>">
+					<div class="<% if $Image %>col-sm-6<% else %>col-sm-12<% end_if %> text-justify <% if $Odd %>inner-top-xs inner-left-xs<% else %><% if $Image %>col-sm-pull-6<% end_if %> inner-top-xs inner-right-xs<% end_if %>">
 						<h2>$Title</h2>
 						$Content
 					</div>

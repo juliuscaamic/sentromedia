@@ -39,7 +39,7 @@
 				<section id="hero">
 					<div id="owl-main" class="owl-carousel height-lg owl-inner-nav owl-ui-lg">
 						<% loop $SpinningBanners %>
-							<div class="item" style="background-image: url($Image.Link);">
+							<div class="item" style="background: linear-gradient(rgba(0,0,0,.5), #283842), url($Image.CroppedImage(1920, 680).Link);">
 								<div class="container">
 									<div class="caption vertical-center text-left">
 										<h1 class="fadeInRight-1 dark-bg light-color"><span>$Title</span></h1>

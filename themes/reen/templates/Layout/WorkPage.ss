@@ -85,14 +85,14 @@
 		<div class="container">
 			<div class="col-sm-2 reset-padding">
 				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">Facebook</p>
-					<i class="icon-s-facebook st_facebook_custom" displayText='Facebook'></i>
+					<p class="name">Twitter</p>
+					<i class="icon-s-twitter st_twitter_custom" displayText='Tweet'></i>
 				</a>
 			</div>
 			<div class="col-sm-2 reset-padding">
 				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">Twitter</p>
-					<i class="icon-s-twitter st_twitter_custom" displayText='Tweet'></i>
+					<p class="name">Facebook</p>
+					<i class="icon-s-facebook st_facebook_custom" displayText='Facebook'></i>
 				</a>
 			</div>
 			<div class="col-sm-2 reset-padding">

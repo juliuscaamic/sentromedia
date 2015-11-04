@@ -4,6 +4,7 @@ class ServicesFeature extends DataObject {
 	private static $db = array(
 		'Title' => 'Varchar', 
 		'Content' => 'HTMLText', 
+		'BackgroundColour' => 'Color', 
 		'SortOrder' => 'Int'
 	);
 
@@ -28,6 +29,10 @@ class ServicesFeature extends DataObject {
 
 		$fields->dataFieldByName('Content')
 			->setRows(20);
+		$fields->replaceField(
+			'BackgroundColour', 
+			ColorField::create('BackgroundColour', 'Background colour')
+		);
 
 		return $fields;
 	}
