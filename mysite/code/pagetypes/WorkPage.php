@@ -80,9 +80,7 @@ class WorkPage extends BlogPost {
 		$fields->removeByName('RelatedPosts');
 		$fields->removeByName('Authors');
 		$fields->removeByName('AuthorNames');
-
-		$fields->dataFieldByName('PublishDate')
-			->setTitle('Deployment Date');
+		$fields->removeByName('PublishDate');
 
 		$fields->insertBefore(
 			TextField::create('WebsiteAddress', 'Website Address'), 

@@ -27,8 +27,6 @@
 				
 				<div class="col-sm-4 col-sm-offset-1 outer-top-xs inner-left-xs border-left">
 					<ul class="item-details">
-						<li class="date">$PublishDate.Format('M d, Y')</li>
-
 						<% if $Categories %>
 							<li class="categories"><% loop $Categories %>$Title<% if not $Last %>,<% end_if %> <% end_loop %></li>
 						<% end_if %>
@@ -91,47 +89,6 @@
 			</div>
 		</div>
 		
-	</section>
-		
-	<section id="share" class="light-bg">
-		<div class="container">
-			<div class="col-sm-2 reset-padding">
-				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">Twitter</p>
-					<i class="icon-s-twitter st_twitter_custom" displayText='Tweet'></i>
-				</a>
-			</div>
-			<div class="col-sm-2 reset-padding">
-				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">Facebook</p>
-					<i class="icon-s-facebook st_facebook_custom" displayText='Facebook'></i>
-				</a>
-			</div>
-			<div class="col-sm-2 reset-padding">
-				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">LinkedIn</p>
-					<i class="icon-s-linkedin st_linkedin_custom" displayText='LinkedIn'></i>
-				</a>
-			</div>
-			<div class="col-sm-2 reset-padding">
-				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">Google +</p>
-					<i class="icon-s-gplus st_googleplus_custom" displayText='Google+'></i>
-				</a>
-			</div>
-			<div class="col-sm-2 reset-padding">
-				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">Pinterest</p>
-					<i class="icon-pinterest-squared st_pinterest_custom" displayText='Pinterest'></i>
-				</a>
-			</div>						
-			<div class="col-sm-2 reset-padding">
-				<a href="javascript:void(0);" class="btn-share-md">
-					<p class="name">Mail</p>
-					<i class="icon-mail-alt st_email_custom" displayText='Mail'></i>
-				</a>
-			</div>			
-		</div>
 	</section>
 
 	<% if $ActionBoxTitle %>
