@@ -1,23 +1,26 @@
 <main>
-	
-	<section id="portfolio-post">
-		<div class="container inner-top-md">
-			
-			<% if $FeaturedImage %>
+
+	<% if $FeaturedImage%>
+		<section class="dark-bg img-bg-soft img-bg" style="background-image: url($FeaturedImage.Link); height:580px;">
+			<div class="container">
 				<div class="row">
-					<div class="col-sm-12">
-						<figure>
-							<img src="$FeaturedImage.Link" alt="$FeaturedImage.Title">
-						</figure>
+					<div class="col-md-8 col-sm-9 inner">
+						<header>
+							<h1>$Title.XML</h1>
+						</header>
 					</div>
 				</div>
-			<% end_if %>
+			</div>
+		</section>
+	<% end_if %>
+	
+	<section id="portfolio-post">
+		<div class="container">
 			
 			<div class="row inner-top-xs reset-xs">
 				
 				<div class="col-sm-7 inner-top-xs inner-right-xs">
 					<header class="text-justify">
-						<h2>$Title</h2>
 						$Content
 					</header>
 				</div>
@@ -46,31 +49,40 @@
 			
 			<% if $Features %>
 				<% loop $Features %>
-					<div class="row inner-top <% if $Last %>inner-bottom<% end_if %>">
+					<div class="row <% if $First %>outer-top-md<% end_if %> <% if $Last %>inner-bottom outer-bottom<% end_if %>" <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>
 						
 						<% if $Odd %>
-							<div class="col-sm-6 inner-top-xs">
-								<figure>
-									<img src="$Image.Link" alt="$Image.Title">
-								</figure>
-							</div>
+							<% if $Image %>
+								<div class="<% if $Content %>col-sm-6<% else %>col-sm-12<% end_if %>" style="padding:0;">
+									<figure>
+										<img src="$Image.Link" alt="$Image.Title">
+									</figure>
+								</div>
+							<% end_if %>
 
-							<div class="col-sm-6 inner-top-xs inner-left-xs text-justify">
-								<h3>$Title</h3>
-								$Content
-							</div>
+							<% if $Content %>
+								<div class="<% if $Image %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-left-md inner-right-md">
+									<h2 <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>$Title</h2>
+									$Content
+								</div>
+							<% end_if %>
 
 						<% else %>
-							<div class="col-sm-6 inner-top-xs inner-left-xs text-justify">
-								<h3>$Title</h3>
-								$Content
-							</div>
+							<% if $Content %>
+								<div class="<% if $Image %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-left-md inner-right-md">
+									<h2 <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>$Title</h2>
+									$Content
+								</div>
+							<% end_if %>
 
-							<div class="col-sm-6 inner-top-xs">
-								<figure>
-									<img src="$Image.Link" alt="$Image.Title">
-								</figure>
-							</div>
+							<% if $Image %>
+								<div class="<% if $Content %>col-sm-6<% else %>col-sm-12<% end_if %>" style="padding:0;">
+									<figure>
+										<img src="$Image.Link" alt="$Image.Title">
+									</figure>
+								</div>
+							<% end_if %>
+
 						<% end_if %>
 												
 					</div>
@@ -123,7 +135,7 @@
 	</section>
 
 	<% if $ActionBoxTitle %>
-		<section id="get-in-touch" class="tint-bg">
+		<section id="get-in-touch" class="tint-bg img-bg-soft img-bg" <% if $ActionBoxBackgroundImage %>style="background-image: url($ActionBoxBackgroundImage.Link);"<% end_if %>>
 				<div class="container inner-sm">
 					<div class="row">
 						<div class="col-sm-10 center-block text-center">

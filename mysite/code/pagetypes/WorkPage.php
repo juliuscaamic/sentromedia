@@ -27,7 +27,8 @@ class WorkPage extends BlogPost {
 	 * @var array
 	 */
 	private static $has_one = array(
-		'ActionBoxRedirectPage' => 'SiteTree'
+		'ActionBoxRedirectPage' => 'SiteTree', 
+		'ActionBoxBackgroundImage' => 'Image'
 	);
 
 	/**
@@ -123,6 +124,12 @@ class WorkPage extends BlogPost {
 		$fields->addFieldToTab(
 			'Root.ActionBox', 
 			TreeDropdownField::create('ActionBoxRedirectPageID', 'Redirect page', 'SiteTree')
+		);
+
+		$fields->addFieldToTab(
+			'Root.ActionBox', 
+			UploadField::create('ActionBoxBackgroundImage', 'Background image')
+				->setFolderName('Works/')
 		);
 
 		return $fields;

@@ -4,6 +4,7 @@ class WorkFeature extends DataObject {
 	private static $db = array(
 		'Title' => 'Varchar', 
 		'Content' => 'HTMLText', 
+		'BackgroundColour' => 'Color', 
 		'SortOrder' => 'Int'
 	);
 
