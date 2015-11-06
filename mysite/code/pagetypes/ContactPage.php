@@ -33,6 +33,7 @@ class ContactPage_Controller extends GenericPage_Controller {
 		$title = '';
 		$lat = '';
 		$long = '';
+		$marker = $this->getBlockMap()->Marker()->Link();
 		if ($blockMap) {
 			if ($blockMap->RegionalOffices()->First()) {
 				$title = $blockMap->RegionalOffices()->First()->Title;
@@ -42,6 +43,7 @@ class ContactPage_Controller extends GenericPage_Controller {
 
 			Requirements::customScript(<<<JS
 				var googleMapTitle = '$title';
+				var googleMapMarker = '$marker';
 				var googleLat = '$lat';
 				var googleLong = '$long';
 JS

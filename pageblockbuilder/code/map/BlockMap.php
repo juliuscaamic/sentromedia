@@ -1,6 +1,10 @@
 <?php
 class BlockMap extends Block {
 
+	private static $has_one = array(
+		'Marker' => 'Image', 
+	);
+
 	private static $has_many = array(
 		'RegionalOffices' => 'MapRegionalOffice'
 	);
@@ -30,6 +34,12 @@ class BlockMap extends Block {
 				GridFieldConfig_RecordEditor::create()
 					->addComponent(new GridFieldSortableRows('SortOrder'))
 			)
+		);
+
+		$fields->insertAfter(
+			$fields->dataFieldByName('Marker')
+				->setFolderName('BlockMap'), 
+				'Content'
 		);
 
 		return $fields;

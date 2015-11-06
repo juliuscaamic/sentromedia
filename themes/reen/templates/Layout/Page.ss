@@ -94,10 +94,20 @@
 
 			<% if $ClassName == 'BlockTab' %>
 				<section id="circle-tabs">
-					<div class="container">
+					<div class="container inner-top">
+
+						<div class="row">
+							<div class="col-md-8 col-sm-10 center-block text-center">
+								<header>
+									<h1>$Title</h1>
+									
+								</header>
+							</div>
+						</div>
 						
 						<div class="row">
-							<div class="col-xs-12 inner-top">
+							<div class="col-xs-12 inner-top-sm outer-bottom-sm">
+
 								<div class="tabs tabs-services tabs-circle-top tab-container">
 									
 									<ul class="etabs text-center">
