@@ -10,9 +10,13 @@ After:
 File:
     allowed_extensions:
         - svg
+
 Image:
-    allowed_extensions:
-        - svg
+  extensions:
+    - WorkFeaturedImage_Extension
+  allowed_extensions:
+    - svg
+
 SSViewer:
   theme: 'simple'
 

@@ -9,8 +9,11 @@ class WorkFeature extends DataObject {
 	);
 
 	private static $has_one = array(
-		'WorkPage' => 'WorkPage',
-		'Image' => 'Image'
+		'WorkPage' => 'WorkPage'
+	);
+
+	private static $many_many = array(
+		'FeaturedImages' => 'Image'
 	);
 
 	private static $default_sort = 'SortOrder';
@@ -22,13 +25,23 @@ class WorkFeature extends DataObject {
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
 
+		$fields->removeByName('FeaturedImages');
 		$fields->removeFieldsFromTab(
 			'Root.Main', 
-			array('WorkPageID', 'SortOrder')
+			array('WorkPageID', 'SortOrder', 'FeaturedImages')
 		);
 
 		$fields->dataFieldByName('Content')
 			->setRows(20);
+
+		if ($this->ID) {
+		$fields->insertAfter(
+			UploadField::create('FeaturedImages', 'Images')
+				->setAllowedMaxFileNumber(10)
+				->setFolderName('Portfolios/' .$this->WorkPage()->ID. '/FeaturedImages'), 
+			'BackgroundColour'
+		);			
+		}
 
 		return $fields;
 	}

@@ -339,7 +339,7 @@ $(document).ready(function () {
 		pagination: true,
 		rewindNav: true,
 		singleItem: true,
-		autoHeight: true,
+		autoHeight: false, 
 		navigationText: ["<i class='icon-left-open-mini'></i>", "<i class='icon-right-open-mini'></i>"]
 	});
 	
