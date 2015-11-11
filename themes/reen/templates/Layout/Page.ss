@@ -263,15 +263,11 @@
 						<div class="row inner-top-sm text-center">
 							
 							<% loop $TeamMembers %>
-								<div class="col-sm-6 inner-bottom-sm inner-left inner-right">
+								<div class="col-sm-4 inner-bottom-sm inner-left inner-right">
 									<figure class="member">
-										
-										<div class="icon-overlay icn-link">
-											<a href="javascript:void(0);">
-												<img src="$Image.Link" title="$Image.Title" class="img-circle">
-											</a>
-										</div>
-										
+										<% if $Image %>
+											<img src="$Image.CroppedImage(400, 400).Link" title="$Image.Title">
+										<% end_if %>
 										<figcaption>
 											<h2>$Title<span>$Position</span></h2>
 											$Content
