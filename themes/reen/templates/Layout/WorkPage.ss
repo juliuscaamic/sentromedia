@@ -73,7 +73,7 @@
 							<% end_if %>
 
 							<% if $Content %>
-								<div class="<% if $FeaturedImages %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-left-md inner-right-md">
+								<div class="<% if $FeaturedImages %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-bottom-md inner-left-md inner-right-md">
 									<h2 <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>$Title</h2>
 									$Content
 								</div>
@@ -81,7 +81,7 @@
 
 						<% else %>
 							<% if $Content %>
-								<div class="<% if $FeaturedImages %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-left-md inner-right-md">
+								<div class="<% if $FeaturedImages %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-bottom-md inner-left-md inner-right-md">
 									<h2 <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>$Title</h2>
 									$Content
 								</div>
@@ -94,9 +94,20 @@
 											<img src="<% if not $Content %>$FeaturedImages.First.Link<% else %>$FeaturedImages.First.CroppedImage(800, 800).Link<% end_if %>" alt="$FeaturedImages.First.Title">
 										</figure>
 									</div>
+								<% else %>
+									<div class="<% if $Content %>col-sm-6<% else %>col-sm-12<% end_if %>" style="padding:0;">
+										<div id="owl-work" class="owl-carousel owl-inner-pagination <% if $Content %>owl-inner-nav<% else %>owl-inner-nav<% end_if %> owl-ui-md" style="height:600px;">
+											<% loop $FeaturedImages %>
+												<div class="item">
+													<figure>
+														<img src="$Link" alt="$Title" style="height:600px;">
+													</figure>
+												</div>
+											<% end_loop %>
+										</div>
+									</div>
 								<% end_if %>
 							<% end_if %>
-
 						<% end_if %>
 												
 					</div>

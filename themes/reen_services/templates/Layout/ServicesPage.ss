@@ -14,20 +14,44 @@
 	</section>
 
 	<section id="product">
-		<div class="container inner">
-			<% loop $Features %>			
-				<div class="row <% if $BackgroundColour %>outer-top-md inner-bottom-md<% else %>inner-top-md<% end_if %>" <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>
-					<% if $Image %>
-						<div class="col-sm-6 <% if $Odd %>inner-right-xs text-right<% else %>col-sm-push-6 inner-left-xs<% end_if %>">
-							<figure><img src="$Image.PaddedImage(555, 380).Link" alt="$FeaturedImage.Title"></figure>
-						</div>
+		<div class="container">
+			<% loop $Features %>
+				<div class="row <% if $First %>outer-top-md<% end_if %> <% if $Last %>outer-bottom<% end_if %>" <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>
+					
+					<% if $Odd %>
+						<% if $Image %>
+							<div class="<% if $Content %>col-sm-6<% else %>col-sm-12<% end_if %>" style="padding:0;">
+								<figure>
+									<img src="$Image.CroppedImage(800, 800).Link" alt="$Image.Title">
+								</figure>
+							</div>
+						<% end_if %>
+
+						<% if $Content %>
+							<div class="<% if $Image %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-bottom-md inner-left-md inner-right-md">
+								<h2 <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>$Title</h2>
+								$Content
+							</div>
+						<% end_if %>
+
+					<% else %>
+						<% if $Content %>
+							<div class="<% if $Image %>col-sm-6<% else %>col-sm-12 text-center<% end_if %> inner-top-md inner-bottom-md inner-left-md inner-right-md">
+								<h2 <% if $BackgroundColour %>style="background-color: #$BackgroundColour; color:#FFF;"<% end_if %>>$Title</h2>
+								$Content
+							</div>
+						<% end_if %>
+
+						<% if $Image %>
+							<div class="<% if $Content %>col-sm-6<% else %>col-sm-12<% end_if %>" style="padding:0;">
+								<figure>
+									<img src="<% if not $Content %>$Image.Link<% else %>$Image.CroppedImage(800, 800).Link<% end_if %>" alt="$Image.Title">
+								</figure>
+							</div>
+						<% end_if %>
+
 					<% end_if %>
-					
-					<div class="<% if $Image %>col-sm-6<% else %>col-sm-12<% end_if %> text-justify <% if $Odd %>inner-top-xs inner-left-xs<% else %><% if $Image %>col-sm-pull-6<% end_if %> inner-top-xs inner-right-xs<% end_if %>">
-						<h2>$Title</h2>
-						$Content
-					</div>
-					
+											
 				</div>
 			<% end_loop %>
 		</div>
