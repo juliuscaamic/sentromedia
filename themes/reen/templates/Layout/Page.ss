@@ -16,6 +16,28 @@
 				</section>			
 			<% end_if %>
 
+			<% if $ClassName == 'BlockImage' %>
+				<section id="product">
+					<div class="container inner">
+						<div class="row">
+							<div class="col-sm-6 <% if $Position == 'Left' %>inner-right-xs text-right<% else %>col-sm-push-6 inner-left-xs<% end_if %>">
+								<figure>
+									<img src="$Image.Link" alt="$Image.Title">
+								</figure>
+							</div>
+							
+							<div class="col-sm-6 inner-top-xs <% if $Position == 'Left' %>inner-left-xs<% else %>col-sm-pull-6 inner-right-xs<% end_if %>">
+								<h2>$Title</h2>
+								$Content
+								<% if $RedirectPage %>
+									<a href="$RedirectPage.Link" class="txt-btn">$ButtonText</a>
+								<% end_if %>
+							</div>
+						</div>
+					</div>
+				</section>				
+			<% end_if %>
+
 			<% if $ClassName == 'BlockBanner' %>
 				<section id="hero" class="img-bg-bottom light-bg img-bg-softer" style="<% if $Image %>background-image: url($Image.Link);<% end_if %>">
 					<div class="container inner">
