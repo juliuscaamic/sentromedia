@@ -61,17 +61,18 @@
 				<section id="hero">
 					<div id="owl-main" class="owl-carousel height-lg owl-inner-nav owl-ui-lg">
 						<% loop $SpinningBanners %>
-							<div class="item" style="background: linear-gradient(rgba(0,0,0,.5), #283842), url($Image.CroppedImage(1920, 680).Link);">
+							<div class="item" style="background: #283842 url($Image.CroppedImage(1920, 680).Link);">
 								<div class="container">
 									<div class="caption vertical-center text-left">
-										<h1 class="fadeInRight-1 dark-bg light-color"><span>$Title</span></h1>
-										<p class="light-color">$Description</p>
+										<h1 class="fadeInRight-1 light-color"><span>$Title</span></h1>
+										<p>$Description</p>
 										<% if $RedirectPage %>
-											<div class="fadeInRight-3">
-												<a href="$RedirectPage.Link" title="Go to $RedirectPage.Title page" class="btn btn-large">$RedirectButtonText</a>
+											<div class="fadeInRight-3" style="z-index:3;">
+												<a href="$RedirectPage.Link" title="Go to $RedirectPage.Title page" class="btn btn-large btn-bordered">$RedirectButtonText</a>
 											</div>
 										<% end_if %>
 									</div>
+									<div style="opacity: 0.2; background-color: #000000; z-index:1; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"></div>
 								</div>
 							</div>
 						<% end_loop %>
@@ -215,7 +216,7 @@
 			<% end_if %>
 
 			<% if $ClassName == 'BlockActionBox' %>
-				<section id="pattern-background-2" class="tint-bg img-bg-softer" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
+				<section id="pattern-background-2" class="tint-bg img-bg-soft img-bg" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
 					<div class="container">
 						<div class="row">
 							<div class="col-md-8 col-sm-9 inner center-block text-center">

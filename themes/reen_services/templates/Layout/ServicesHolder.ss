@@ -41,7 +41,7 @@
 		<% loop $Blocks %>
 
 			<% if $ClassName == 'BlockActionBox' %>
-				<section id="pattern-background-2" class="tint-bg img-bg-softer" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
+				<section id="pattern-background-2" class="tint-bg img-bg-soft img-bg" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
 					<div class="container">
 						<div class="row">
 							<div class="col-md-8 col-sm-9 inner center-block text-center">

@@ -56,7 +56,6 @@ html:not(.no-csstransitions) main [class*="col-"] {
 body {
     font-family: 'Source Sans Pro', sans-serif;
     background-color: #283645;
-    color: #979797;
     font-size: 18px;
 	line-height: 150%;
     -webkit-font-smoothing: antialiased;
@@ -250,6 +249,7 @@ footer .social li a i {font-size: 22px;}
 	   -moz-transition: font 200ms ease-out;
 		 -o-transition: font 200ms ease-out;
 			transition: font 200ms ease-out;
+	z-index: 3;
 }
 #hero #owl-main .caption h1.light-bg,
 #hero #owl-main .caption h1.medium-bg,
@@ -262,6 +262,7 @@ footer .social li a i {font-size: 22px;}
 	line-height: 120%;
 }
 #hero p {
+	color: #FFF;
 	font-size: 24px;
 	line-height: 150%;
 	font-weight: 400;
@@ -273,6 +274,7 @@ footer .social li a i {font-size: 22px;}
 	   -moz-transition: font 200ms ease-out, margin 200ms ease-out;
 		 -o-transition: font 200ms ease-out, margin 200ms ease-out;
 			transition: font 200ms ease-out, margin 200ms ease-out;
+	z-index: 3;
 }
 #hero .btn {
 	margin-top: 60px;
@@ -281,6 +283,7 @@ footer .social li a i {font-size: 22px;}
 	   -moz-transition: background 200ms ease-out, font 200ms ease-out, padding 200ms ease-out, margin 200ms ease-out;
 		 -o-transition: background 200ms ease-out, font 200ms ease-out, padding 200ms ease-out, margin 200ms ease-out;
 			transition: background 200ms ease-out, font 200ms ease-out, padding 200ms ease-out, margin 200ms ease-out;
+	z-index: 3;
 }
 #hero .btn-large {
 	font-size: 18px;
@@ -1662,6 +1665,11 @@ aside .thumb figure {
 .btn.btn-gray {
     background: #95A5A6;
 }
+.btn-bordered {
+	border: 2px solid #FFF;
+	background: none !important;
+}
+
 .btn:hover,
 .btn:focus,
 .btn:active,
@@ -3036,12 +3044,12 @@ blockquote:before {
 	height: 30px;
 	font-size: 30px;
 	color: #FFF;
-	background-color: #283842;
-	border: none;
-	-webkit-border-radius: 3px;
-	   -moz-border-radius: 3px;
-			border-radius: 3px;
+	background-color: none;
+	border: 2px solid #FFF;
 	margin: auto;
+	-webkit-border-radius: 50%;
+	   -moz-border-radius: 50%;
+			border-radius: 50%;
 	-webkit-transition: all 200ms ease-out;
 	   -moz-transition: all 200ms ease-out;
 		 -o-transition: all 200ms ease-out;
@@ -3064,7 +3072,7 @@ blockquote:before {
 }
 .owl-carousel:hover .owl-prev:hover,
 .owl-carousel:hover .owl-next:hover {
-    color: #1ABB9C;
+    color: #FFF !important;
 	opacity: 1;
 }
 .owl-outer-nav:after {
@@ -3325,10 +3333,10 @@ blockquote:before {
 	padding-right: 10%;
 }
 #owl-main .caption.text-left {
-	padding-right: 20%;
+	padding-right: 10%;
 }
 #owl-main .caption.text-right {
-	padding-left: 20%;
+	padding-left: 10%;
 }
 #owl-main .caption h1,
 #owl-main .caption p,
@@ -3703,7 +3711,7 @@ textarea.form-control {
 }
 .navbar-form.search .btn-submit {
 	width: 30px;
-	height: 30px;
+	height: 40px;
 }
 footer .newsletter .btn-submit {
 	width: 88px;
@@ -5502,12 +5510,15 @@ input:focus:-ms-input-placeholder {
 		font-size: 38px;
 		line-height: 115%;
 		letter-spacing: 0.031em;
+		z-index:3;
 	}
 	
 	#hero p {
+		color: #FFF !important;
 		font-size: 20px;
 		line-height: 135%;
 		margin-top: 15px;
+		z-index:3;
 	}
 	
 	#hero #owl-main .caption h1.light-bg,
@@ -5519,6 +5530,7 @@ input:focus:-ms-input-placeholder {
 	
 	#hero .btn {
 		margin-top: 25px;
+		z-index: 3;
 	}
 	
 	#hero .btn-large {
@@ -6046,12 +6058,15 @@ input:focus:-ms-input-placeholder {
 	#hero h1 {
 		font-size: 60px;
 		line-height: 115%;
+		z-index: 3;
 	}
 	
 	#hero p {
+		color: #FFF;
 		font-size: 22px;
 		line-height: 135%;
 		margin-top: 17px;
+		z-index: 3;
 	}
 	
 	#hero #owl-main .caption h1.light-bg,
@@ -6063,6 +6078,7 @@ input:focus:-ms-input-placeholder {
 	
 	#hero .btn {
 		margin-top: 35px;
+		z-index: 3;
 	}
 	
 	#hero .btn-large {
@@ -6080,7 +6096,7 @@ input:focus:-ms-input-placeholder {
 	#owl-main .item,
 	#owl-main.height-md .item,
 	#owl-main.height-lg .item {
-		height: 480px;
+		height: 560px;
 	}
 	
 }

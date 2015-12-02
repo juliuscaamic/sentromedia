@@ -1,5 +1,5 @@
 <main>
-	<section id="hero" class="light-bg img-bg-bottom img-bg-softer" <% if $HeaderImage %>style="background-image: url($HeaderImage.Link);"<% end_if %>>
+	<section id="hero" class="dark-bg img-bg img-bg-soft" <% if $HeaderImage %>style="background-image: url($HeaderImage.Link);"<% end_if %>>
 		<div class="container inner">
 			
 			<div class="row">
@@ -19,13 +19,15 @@
 			<% loop $Features %>
 				<div class="row <% if not $First %>inner-top-md<% end_if %>">
 					
-					<div class="col-sm-6 <% if $Odd %>inner-right-xs text-right<% else %>col-sm-push-6 inner-left-xs<% end_if %>">
-						<figure>
-							<img src="$Image.Link" alt="$Image.Title">
-						</figure>
-					</div>
+					<% if $Image %>
+						<div class="col-sm-6 <% if $Odd %>inner-right-xs text-right<% else %>col-sm-push-6 inner-left-xs<% end_if %>">
+							<figure>
+								<img src="$Image.Link" alt="$Image.Title">
+							</figure>
+						</div>
+					<% end_if %>
 					
-					<div class="col-sm-6 inner-top-xs <% if $Odd %>inner-left-xs<% else %>col-sm-pull-6 inner-right-xs<% end_if %>">
+					<div class="<% if $Image %>col-sm-6 <% if $Odd %>inner-left-xs<% else %>col-sm-pull-6 inner-right-xs<% end_if %><% else %>col-sm-12<% end_if %> inner-top-xs">
 						<h2>$Title</h2>
 						$Content
 					</div>
@@ -219,7 +221,7 @@
 			<% end_if %>
 
 			<% if $ClassName == 'BlockActionBox' %>
-				<section id="pattern-background-2" class="tint-bg img-bg-softer" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
+				<section id="pattern-background-2" class="tint-bg img-bg-soft img-bg" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
 					<div class="container">
 						<div class="row">
 							<div class="col-md-8 col-sm-9 inner center-block text-center">
