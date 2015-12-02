@@ -35,5 +35,31 @@
 								
 			</div>
 		</div>
-	</section>	
+	</section>
+
+	<% if $Blocks %>
+		<% loop $Blocks %>
+
+			<% if $ClassName == 'BlockActionBox' %>
+				<section id="pattern-background-2" class="tint-bg img-bg-softer" <% if $ActionBoxes.First.BackgroundImage %>style="background-image: url($ActionBoxes.First.BackgroundImage.Link);"<% end_if %>>
+					<div class="container">
+						<div class="row">
+							<div class="col-md-8 col-sm-9 inner center-block text-center">
+								<header>
+									<h1>$ActionBoxes.First.Title</h1>
+									$ActionBoxes.First.Content
+								</header>
+
+								<% if $ActionBoxes.First.RedirectPage %>
+									<a href="$ActionBoxes.First.RedirectPage.Link" title="Go to $ActionBoxes.First.RedirectPage.Title" class="btn btn-large">$ActionBoxes.First.ButtonText</a>
+								<% end_if %>
+
+							</div>
+						</div>
+					</div>
+				</section>
+			<% end_if %>
+
+		<% end_loop %>	
+	<% end_if %>
 </main>
