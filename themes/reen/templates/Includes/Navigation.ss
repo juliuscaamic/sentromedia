@@ -8,7 +8,7 @@
 						<div class="yamm-content row">
 							<% if $Children %>
 								<% loop $Children %>
-									<div class="col-sm-3 inner">
+									<div class="col-sm-4 inner">
 										<h4><a href="$Link" title="Go to $Title.XML page">$MenuTitle.XML</a></h4>
 										
 										<% if $Children %>

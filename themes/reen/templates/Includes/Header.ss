@@ -69,8 +69,8 @@
 					
 					<% include Navigation %>
 					
-				</div><!-- /.container -->
-			</div><!-- /.navbar-collapse -->
-		</div><!-- /.yamm -->
-	</div><!-- /.navbar -->
+				</div>
+			</div>
+		</div>
+	</div>
 </header>
