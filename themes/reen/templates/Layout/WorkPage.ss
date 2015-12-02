@@ -127,7 +127,7 @@
 							$ActionBoxContent
 
 							<% if $ActionBoxRedirectPage %>
-								<a href="$ActionBoxRedirectPage.Link" class="btn btn-large">$ActionBoxRedirectButtonText</a>
+								<a href="$ActionBoxRedirectPage.Link" class="btn btn-large btn-bordered">$ActionBoxRedirectButtonText</a>
 							<% end_if %>
 						</div>
 					</div>

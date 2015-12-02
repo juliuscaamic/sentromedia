@@ -18,8 +18,13 @@ class Page_Controller extends ContentController {
 		Requirements::css('themes/reen/css/owl.carousel.css');
 		Requirements::css('themes/reen/css/owl.transitions.css');
 		Requirements::css('themes/reen/css/animate.min.css');
+		
 		Requirements::css('http://fonts.googleapis.com/css?family=Lato:400,900,300,700');
 		Requirements::css('http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic');
+
+		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:400,700');
+		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:700,400|Oranienbaum');		
+
 		Requirements::css('themes/reen/fonts/fontello.css');
 
 		Requirements::javascript('themes/reen/js/jquery.min.js');

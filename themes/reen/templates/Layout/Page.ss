@@ -226,7 +226,7 @@
 								</header>
 
 								<% if $ActionBoxes.First.RedirectPage %>
-									<a href="$ActionBoxes.First.RedirectPage.Link" title="Go to $ActionBoxes.First.RedirectPage.Title" class="btn btn-large">$ActionBoxes.First.ButtonText</a>
+									<a href="$ActionBoxes.First.RedirectPage.Link" title="Go to $ActionBoxes.First.RedirectPage.Title" class="btn btn-large btn-bordered">$ActionBoxes.First.ButtonText</a>
 								<% end_if %>
 
 							</div>

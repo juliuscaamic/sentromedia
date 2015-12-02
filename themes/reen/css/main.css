@@ -881,7 +881,7 @@ iframe + iframe {
 	color: #283842 !important;
 }
 .tint-color {
-	color: #1ABB9C !important;
+	color: #FFF !important;
 }
 .green {
     color: #1ABB9C !important;
@@ -1732,12 +1732,10 @@ aside .thumb figure {
     background: #859394 !important;
 }
 .tint-bg .btn {
-    background: #FFF !important;
-	color: #1ABB9C !important;
+	color: #fff !important;
 }
 .tint-bg .btn:hover {
-    background: #E9E9E9 !important;
-    color: #283842 !important;
+    color: #fff !important;
 }
 .btn.share-facebook {
     background: #3d5b9b !important
