@@ -72,7 +72,7 @@
 											</div>
 										<% end_if %>
 									</div>
-									<div style="opacity: 0.2; background-color: #000000; z-index:1; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"></div>
+									<div style="opacity: 0.56; background-color: #2f4052; z-index:1; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"></div>
 								</div>
 							</div>
 						<% end_loop %>
