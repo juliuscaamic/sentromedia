@@ -3,7 +3,7 @@
 		<div class="row">
 
 		<% loop $SiteConfig.FooterMenus %>
-			<div class="col-md-2 col-sm-4 col-xs-12 inner links">
+			<div class="col-md-3 col-sm-4 col-xs-12 inner links">
 				<h4>$Title</h4>
 				<% if $Pages %>
 					<ul>
@@ -33,7 +33,7 @@
 				</ul>
 			</div>
 
-			<div class="col-md-4 col-sm-4 col-xs-12 inner">
+			<div id="NewsletterSocialServices" class="col-md-5 col-sm-4 col-xs-12 inner">
 				<% if $SiteConfig.SocialMediaServices %>
 					<ul class="social list-inline">
 						<% loop $SiteConfig.SocialMediaServices %>
@@ -72,7 +72,6 @@
 				<% end_if %>
 				$MailChimpForm
 			</div>
-			
 		</div>
 	</div>
   

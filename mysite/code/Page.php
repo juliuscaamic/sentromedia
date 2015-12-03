@@ -52,7 +52,7 @@ class Page_Controller extends ContentController {
 	 */
 	public function MailChimpForm() {
 		$form = parent::MailChimpForm();
-		$form->addExtraClass('form-inline newsletter');
+		$form->addExtraClass('contactform');
 		$form->setAttribute('role', 'form');
 		$form->setAttribute('id', 'newsletter');
 

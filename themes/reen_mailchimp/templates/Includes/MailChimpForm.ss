@@ -5,9 +5,14 @@
 <% end_if %>
 
 <form $FormAttributes>
-
-	<label for="MailChimpForm_MailChimpForm_Email" class="sr-only">$Fields.dataFieldByName(Email).Title</label>
-	$Fields.dataFieldByName(Email)
+	<div class="row">
+		<div class="col-sm-12">
+			$Fields.dataFieldByName(Name)
+		</div>
+		<div class="col-sm-12">
+			$Fields.dataFieldByName(Email)
+		</div>
+	</div>
 
 	$Fields.dataFieldByName(SecurityID)
 

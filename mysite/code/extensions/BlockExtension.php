@@ -5,5 +5,6 @@ class Block_Extension extends Extension {
 		$components['BlockFeaturedWork'] = 'Featured Work';
 		$components['BlockTeam'] = 'Team';
 		$components['BlockContactForm'] = 'Contact Form';
+		$components['BlockCallOut'] = 'Call Out';
 	}
 }

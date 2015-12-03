@@ -65,9 +65,9 @@ JS
 		
 		$apiData = array(
 			'id'                => $settings->MailChimpList()->filter(array('Code' => 'NEWSLETTER'))->First()->ListID,
-			'email'             => array('email' => $data['Email']),
+			'email'             => array('email' => $data['Email'], 'name' => $data['Name']),
 			'double_optin'      => false,
-			'update_existing'   => false,
+			'update_existing'   => true,
 			'replace_interests' => false,
 			'send_welcome'      => false,
 		);

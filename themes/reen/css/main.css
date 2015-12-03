@@ -3670,10 +3670,23 @@ textarea.form-control {
     clear: both;
     visibility: hidden;
 }
-.newsletter {
+
+#NewsletterSocialServices {border: 1px solid #4D5C6B;}
+#NewsletterSocialServices .alert-success {
+	border-radius: 0;
+	background: #4a9887;
+	border: none;
+	font-size: 14px;
+}
+#NewsletterSocialServices p {
+	text-transform: uppercase;
+	color: #FFF;
+	font-size: 18px;
+}
+#newsletter {
     position: relative;
 }
-.newsletter input[type="email"] {
+#newsletter input[type="email"], #newsletter input[type="text"] {
     background: rgba(255,255,255,0.15);
 	padding-right: 100px;
     -webkit-border-radius: 3px;
@@ -3681,7 +3694,7 @@ textarea.form-control {
     border: none;
     color: #FFF !important;
 }
-.newsletter input[type="email"]:focus {
+#newsletter input[type="email"]:focus, #newsletter input[type="text"]:focus {
     background: rgba(255,255,255,0.20);
 }
 .navbar .searchbox .dropdown-menu {
