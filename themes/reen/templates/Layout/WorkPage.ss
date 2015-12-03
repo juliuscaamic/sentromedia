@@ -13,6 +13,29 @@
 			</div>
 		</section>
 	<% end_if %>
+
+	<% if $Blocks %>
+		<% loop $Blocks %>
+			<% if $ClassName == 'BlockCallOut' %>
+				<section class="tint-bg">
+					<div class="container inner-xs">
+						<div class="row">
+							<div class="col-sm-12 center-block text-center">
+								<h3 class="single-block">$Title 
+									<% if $RedirectPage %>
+										<a href="$RedirectPage.Link" class="btn btn-large btn-bordered">
+											$RedirectButtonText
+										</a>
+									<% end_if %>
+								</h3>
+							</div>
+						</div>
+					</div>
+				</section>
+			<% end_if %>
+		<% end_if %>
+	<% end_loop %>
+
 	
 	<section id="portfolio-post">
 		<div class="container">
