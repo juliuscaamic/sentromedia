@@ -40,6 +40,39 @@
 	<% if $Blocks %>
 		<% loop $Blocks %>
 
+			<% if $ClassName == 'BlockQuote' %>
+				<section class="tint-bg">
+					<div class="container">
+						<div class="row">
+							<div class="col-md-8 inner-xs">
+								<header>
+									<h1>$Title</h1>
+									$Content
+
+									<% if $RedirectPage %>
+										<a class="btn btn-large btn-bordered" href="$RedirectPage.Link">$RedirectButtonText</a>
+									<% end_if %>
+								</header>
+							</div>
+							<div class="col-md-4 inner-xs pricing">
+								<div class="plan">
+									<header>
+										<h2>Starting estimated cost</h2>
+										
+										<div class="price">
+											<span class="currency">$</span>
+											<span class="amount">$TotalEstimate</span>
+										</div>
+
+										<a class="btn" href="#">Add to your quote</a>
+									</header>
+								</div>							
+							</div>
+						</div>
+					</div>
+				</section>
+			<% end_if %>
+
 			<% if $ClassName == 'BlockText' %>
 				<section id="who-we-are">
 					<div class="container inner-md">
@@ -71,28 +104,6 @@
 						</div>
 					</div>
 				</section>			
-			<% end_if %>
-
-			<% if $ClassName == 'BlockSpinningBanner' %>
-				<section id="hero">
-					<div id="owl-main" class="owl-carousel height-lg owl-inner-nav owl-ui-lg">
-						<% loop $SpinningBanners %>
-							<div class="item" style="background-image: url($Image.Link);">
-								<div class="container">
-									<div class="caption vertical-center text-left">
-										<h1 class="fadeInRight-1 dark-bg light-color"><span>$Title</span></h1>
-										<p class="light-color">$Description</p>
-										<% if $RedirectPage %>
-											<div class="fadeInRight-3">
-												<a href="$RedirectPage.Link" title="Go to $RedirectPage.Title page" class="btn btn-large">$RedirectButtonText</a>
-											</div>
-										<% end_if %>
-									</div>
-								</div>
-							</div>
-						<% end_loop %>
-					</div>
-				</section>
 			<% end_if %>
 
 			<% if $ClassName == 'BlockAccordion' %>

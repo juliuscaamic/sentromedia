@@ -126,7 +126,8 @@ class Block extends DataObject {
 			'BlockCarousel' => 'Carousel', 
 			'BlockActionBox' => 'Action Box', 
 			'BlockSpinningBanner' => 'Spinning Banner', 
-			'BlockBanner' => 'Banner'
+			'BlockBanner' => 'Banner', 
+			'BlockQuote' => 'Quote'
 		);
 
 		$this->extend('updateListComponents', $components);
