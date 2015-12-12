@@ -67,7 +67,7 @@ $color-good: #72c34b !default;			// green
 /*$color-optional: #a1d2eb !default; */	// orange
 
 $color-cms-batchactions-menu-background: #f5f5f5 !default;
-$color-cms-batchactions-menu-selected-background: #efe999 !default;
+$color-cms-batchactions-menu-selected-background: #fffcdc !default;
 
 /** -----------------------------------------------
  * Textures
@@ -95,3 +95,4 @@ $grid-x: 8px !default;
  * Application Logo (CMS Logo) Must be 24px x 24px
  * ------------------------------------------------ */
 $application-logo-small: url("../images/logo_small.png") !default;
+$application-logo-small-2x: url("../images/logo_small@2x.png") !default;

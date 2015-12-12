@@ -309,7 +309,10 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 						if (!source) return;
 
 						var parent = source;
-						while (parent && parent.nodeType == 1) parent = parent.parentNode;
+						try {
+							while (parent && parent.nodeType == 1) parent = parent.parentNode;
+						}
+						catch(err) {}
 
 						if (!parent) $(source).unbind().remove();
 					});
@@ -329,8 +332,8 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 			},
 
 			redraw: function() {
-				// Using a global config (generated through HTMLEditorConfig PHP logic)
-				var config = ssTinyMceConfig, self = this, ed = this.getEditor();
+				// Using textarea config ID from global config object (generated through HTMLEditorConfig PHP logic)
+				var config = ssTinyMceConfig[this.data('config')], self = this, ed = this.getEditor();
 
 				ed.init(config);
 
@@ -495,8 +498,8 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 
 					this.find(':input:not(:submit)[data-skip-autofocus!="true"]').filter(':visible:enabled').eq(0).focus();
 
-					this.updateFromEditor();
 					this.redraw();
+					this.updateFromEditor();
 				},
 
 				onssdialogclose: function(){
@@ -570,29 +573,51 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 
 				this.addAnchorSelector();
 
+				this.resetFileField();
+
 				// Toggle field visibility depending on the link type.
 				this.find('div.content .field').hide();
-				this.find('.field#LinkType').show();
-				this.find('.field#' + linkType).show();
-				if(linkType == 'internal' || linkType == 'anchor') this.find('.field#Anchor').show();
-				if(linkType !== 'email') this.find('.field#TargetBlank').show();
-				if(linkType == 'anchor') this.find('.field#AnchorSelector').show();
-				this.find('.field#Description').show();
+				this.find('.field[id$="LinkType"]').show();
+				this.find('.field[id$="' + linkType +'_Holder"]').show();
+
+				if(linkType == 'internal' || linkType == 'anchor') {
+					this.find('.field[id$="Anchor_Holder"]').show();
+				}
+
+				if(linkType == 'email') {
+					this.find('.field[id$="Subject_Holder"]').show();
+				} else {
+					this.find('.field[id$="TargetBlank_Holder"]').show();
+				}
+
+				if(linkType == 'anchor') {
+					this.find('.field[id$="AnchorSelector_Holder"]').show();
+				}
+				this.find('.field[id$="Description_Holder"]').show();
 			},
 			/**
 			 * @return Object Keys: 'href', 'target', 'title'
 			 */
 			getLinkAttributes: function() {
-				var href, target = null, anchor = this.find(':input[name=Anchor]').val();
+				var href,
+					target = null,
+					subject = this.find(':input[name=Subject]').val(),
+					anchor = this.find(':input[name=Anchor]').val();
 				
 				// Determine target
-				if(this.find(':input[name=TargetBlank]').is(':checked')) target = '_blank';
-				
+				if(this.find(':input[name=TargetBlank]').is(':checked')) {
+					target = '_blank';
+				}
+
 				// All other attributes
 				switch(this.find(':input[name=LinkType]:checked').val()) {
 					case 'internal':
 						href = '[sitetree_link,id=' + this.find(':input[name=internal]').val() + ']';
-						if(anchor) href += '#' + anchor;
+
+						if(anchor) {
+							href += '#' + anchor;
+						}
+
 						break;
 
 					case 'anchor':
@@ -600,12 +625,15 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 						break;
 					
 					case 'file':
-						href = '[file_link,id=' + this.find(':input[name=file]').val() + ']';
+						href = '[file_link,id=' + this.find('.ss-uploadfield .ss-uploadfield-item').attr('data-fileid') + ']';
 						target = '_blank';
 						break;
 					
 					case 'email':
 						href = 'mailto:' + this.find(':input[name=email]').val();
+						if(subject) {
+							href += '?subject=' + encodeURIComponent(subject);
+						}
 						target = null;
 						break;
 
@@ -627,13 +655,25 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 				this.modifySelection(function(ed){
 					ed.insertLink(this.getLinkAttributes());
 				});
-				this.updateFromEditor();
 			},
 			removeLink: function() {
 				this.modifySelection(function(ed){
 					ed.removeLink();
 				});
+
+				this.resetFileField();
 				this.close();
+			},
+
+			resetFileField: function() {
+				// If there's an attached item, remove it
+				var fileField = this.find('#file'),
+					fileUpload = fileField.data('fileupload'),
+					currentItem = fileField.find('.ss-uploadfield-item[data-fileid]');
+
+				if(currentItem.length) {
+					fileUpload._trigger('destroy', null, {content: currentItem});
+				}
 			},
 
 			/**
@@ -782,6 +822,20 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 							el.prop('checked', selected).change();
 						} else if(el.is(':radio')) {
 							el.val([selected]).change();
+						} else if(fieldName == 'file') {
+							// UploadField inputs have a slightly different naming convention
+							el = this.find(':input[name="' + fieldName + '[Uploads][]"]');
+							// We need the UploadField "field", not just the input
+							el = el.parents('.ss-uploadfield');
+							
+							// We have to wait for the UploadField to initialise
+							(function attach(el, selected) {
+								if( ! el.getConfig()) {
+									setTimeout(function(){ attach(el, selected); }, 50);
+								} else {
+									el.attachFiles([selected]);
+								}
+							})(el, selected);
 						} else {
 							el.val(selected).change();
 						}
@@ -1385,7 +1439,6 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 				this._super();
 
 				this.setOrigVal(parseInt(this.val(), 10));
-
 			},
 			onunmatch: function() {
 				this._super();
@@ -1468,7 +1521,7 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
 		});
 
 
-		$('form.htmleditorfield-mediaform #ParentID .TreeDropdownField').entwine({
+		$('form.htmleditorfield-mediaform .field[id$="ParentID_Holder"] .TreeDropdownField').entwine({
 			onadd: function() {
 				this._super();
 
@@ -1491,8 +1544,6 @@ ss.editorWrappers['default'] = ss.editorWrappers.tinyMCE;
  */
 function sapphiremce_cleanup(type, value) {
 	if(type == 'get_from_editor') {
-		// replace indented text with a <blockquote>
-		value = value.replace(/<p [^>]*margin-left[^>]*>([^\n|\n\015|\015\n]*)<\/p>/ig,"<blockquote><p>$1</p></blockquote>");
 	
 		// replace VML pixel image references with image tags - experimental
 		value = value.replace(/<[a-z0-9]+:imagedata[^>]+src="?([^> "]+)"?[^>]*>/ig,"<img src=\"$1\">");

@@ -36,6 +36,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	private static $page_length = 15;
 	
 	private static $allowed_actions = array(
+		'archive',
 		'buildbrokenlinks',
 		'deleteitems',
 		'DeleteItemsForm',
@@ -56,10 +57,18 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		'ListViewForm',
 		'childfilter',
 	);
+
+	/**
+	 * Enable legacy batch actions.
+	 * @deprecated since version 4.0
+	 * @var array
+	 * @config
+	 */
+	private static $enabled_legacy_actions = array();
 	
 	public function init() {
 		// set reading lang
-		if(SiteTree::has_extension('Translatable') && !$this->request->isAjax()) {
+		if(SiteTree::has_extension('Translatable') && !$this->getRequest()->isAjax()) {
 			Translatable::choose_site_locale(array_keys(Translatable::get_existing_content_languages('SiteTree')));
 		}
 		
@@ -88,8 +97,25 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 
 		CMSBatchActionHandler::register('publish', 'CMSBatchAction_Publish');
 		CMSBatchActionHandler::register('unpublish', 'CMSBatchAction_Unpublish');
-		CMSBatchActionHandler::register('delete', 'CMSBatchAction_Delete');
-		CMSBatchActionHandler::register('deletefromlive', 'CMSBatchAction_DeleteFromLive');
+		
+
+		// Check legacy actions
+		$legacy = $this->config()->enabled_legacy_actions;
+
+		// Delete from live is unnecessary since we have unpublish which does the same thing
+		if(in_array('CMSBatchAction_DeleteFromLive', $legacy)) {
+			Deprecation::notice('4.0', 'Delete From Live is deprecated. Use Un-publish instead');
+			CMSBatchActionHandler::register('deletefromlive', 'CMSBatchAction_DeleteFromLive');
+		}
+
+		// Delete action
+		if(in_array('CMSBatchAction_Delete', $legacy)) {
+			Deprecation::notice('4.0', 'Delete from Stage is deprecated. Use Archive instead.');
+			CMSBatchActionHandler::register('delete', 'CMSBatchAction_Delete');
+		} else {
+			CMSBatchActionHandler::register('archive', 'CMSBatchAction_Archive');
+			CMSBatchActionHandler::register('restore', 'CMSBatchAction_Restore');
+		}
 	}
 
 	public function index($request) {
@@ -203,8 +229,8 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	public function LinkWithSearch($link) {
 		// Whitelist to avoid side effects
 		$params = array(
-			'q' => (array)$this->request->getVar('q'),
-			'ParentID' => $this->request->getVar('ParentID')
+			'q' => (array)$this->getRequest()->getVar('q'),
+			'ParentID' => $this->getRequest()->getVar('ParentID')
 		);
 		$link = Controller::join_links(
 			$link,
@@ -265,7 +291,13 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	 * @return boolean
 	 */
 	public function TreeIsFiltered() {
-		return $this->request->getVar('q');
+		$query = $this->getRequest()->getVar('q');
+
+		if (!$query || (count($query) === 1 && isset($query['FilterClass']) && $query['FilterClass'] === 'CMSSiteTreeFilter_Search')) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function ExtraTreeTools() {
@@ -326,8 +358,8 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		// Create the Search and Reset action
 		$actions = new FieldList(
 			FormAction::create('doSearch',  _t('CMSMain_left_ss.APPLY_FILTER', 'Apply Filter'))
-			->addExtraClass('ss-ui-action-constructive'),
-			Object::create('ResetFormAction', 'clear', _t('CMSMain_left_ss.RESET', 'Reset'))
+				->addExtraClass('ss-ui-action-constructive'),
+			Object::create('ResetFormAction', 'clear', _t('CMSMain_left_ss.CLEAR_FILTER', 'Clear Filter'))
 		);
 
 		// Use <button> to allow full jQuery UI styling on the all of the Actions
@@ -344,7 +376,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			->unsetValidator();
 		
 		// Load the form with previously sent search data
-		$form->loadDataFrom($this->request->getVars());
+		$form->loadDataFrom($this->getRequest()->getVars());
 
 		// Allow decorators to modify the form
 		$this->extend('updateSearchForm', $form);
@@ -367,7 +399,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	}
 	
 	public function doSearch($data, $form) {
-		return $this->getsubtree($this->request);
+		return $this->getsubtree($this->getRequest());
 	}
 
 	/**
@@ -390,7 +422,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	 * Create serialized JSON string with site tree hints data to be injected into
 	 * 'data-hints' attribute of root node of jsTree.
 	 * 
-	 * @return String Serialized JSON
+	 * @return string Serialized JSON
 	 */
 	public function SiteTreeHints() {
 		$json = '';
@@ -402,7 +434,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	 	// Generate basic cache key. Too complex to encompass all variations
 	 	$cache = SS_Cache::factory('CMSMain_SiteTreeHints');
 	 	$cacheKey = md5(implode('_', array(Member::currentUserID(), implode(',', $cacheCanCreate), implode(',', $classes))));
-	 	if($this->request->getVar('flush')) $cache->clean(Zend_Cache::CLEANING_MODE_ALL);
+	 	if($this->getRequest()->getVar('flush')) $cache->clean(Zend_Cache::CLEANING_MODE_ALL);
 	 	$json = $cache->load($cacheKey);
 	 	if(!$json) {
 			$def['Root'] = array();
@@ -515,14 +547,14 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			return $id;
 		} 
 		else if($id && is_numeric($id)) {
-			if($this->request->getVar('Version')) {
-				$versionID = (int) $this->request->getVar('Version');
+			if($this->getRequest()->getVar('Version')) {
+				$versionID = (int) $this->getRequest()->getVar('Version');
 			}
 			
 			if($versionID) {
 				$record = Versioned::get_version($treeClass, $id, $versionID);
 			} else {
-				$record = DataObject::get_one($treeClass, "\"$treeClass\".\"ID\" = $id");
+				$record = DataObject::get_by_id($treeClass, $id);
 			}
 
 			// Then, try getting a record from the live site
@@ -531,7 +563,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 				Versioned::reading_stage('Live');
 				singleton($treeClass)->flushCache();
 
-				$record = DataObject::get_one( $treeClass, "\"$treeClass\".\"ID\" = $id");
+				$record = DataObject::get_by_id($treeClass, $id);
 				if($record) Versioned::set_reading_mode('');
 			}
 			
@@ -559,9 +591,9 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	}
 	
 	/**
-	 * @param Int $id
+	 * @param int $id
 	 * @param FieldList $fields
-	 * @return Form
+	 * @return CMSForm
 	 */
 	public function getEditForm($id = null, $fields = null) {
 
@@ -576,8 +608,8 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		$actions = $form->Actions();
 
 		if($record) {
-			$deletedFromStage = $record->IsDeletedFromStage;
-			$deleteFromLive = !$record->ExistsOnLive;
+			$deletedFromStage = $record->getIsDeletedFromStage();
+			$deleteFromLive = !$record->getExistsOnLive();
 
 			$fields->push($idField = new HiddenField("ID", false, $id));
 			// Necessary for different subsites
@@ -644,7 +676,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			// if($form->Fields()->hasTabset()) $form->Fields()->findOrMakeTab('Root')->setTemplate('CMSTabSet');
 			$form->setAttribute('data-pjax-fragment', 'CurrentForm');
 			// Set validation exemptions for specific actions
-			$form->setValidationExemptActions(array('restore', 'revert', 'deletefromlive', 'rollback'));
+			$form->setValidationExemptActions(array('restore', 'revert', 'deletefromlive', 'delete', 'unpublish', 'rollback'));
 
 			// Announce the capability so the frontend can decide whether to allow preview or not.
 			if(in_array('CMSPreviewable', class_implements($record))) {
@@ -669,7 +701,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 
 	/**
 	 * @param SS_HTTPRequest $request
-	 * @return String HTML
+	 * @return string HTML
 	 */
 	public function treeview($request) {
 		return $this->renderWith($this->getTemplatesWithSuffix('_TreeView'));
@@ -677,7 +709,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 
 	/**
 	 * @param SS_HTTPRequest $request
-	 * @return String HTML
+	 * @return string HTML
 	 */
 	public function listview($request) {
 		return $this->renderWith($this->getTemplatesWithSuffix('_ListView'));
@@ -753,8 +785,8 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	}
 	
 	public function ListViewForm() {
-		$params = $this->request->requestVar('q');
-		$list = $this->getList($params, $parentID = $this->request->requestVar('ParentID'));
+		$params = $this->getRequest()->requestVar('q');
+		$list = $this->getList($params, $parentID = $this->getRequest()->requestVar('ParentID'));
 		$gridFieldConfig = GridFieldConfig::create()->addComponents(			
 			new GridFieldSortableHeader(),
 			new GridFieldDataColumns(),
@@ -840,9 +872,8 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		// Fall back to homepage record
 		if(!$id) {
 			$homepageSegment = RootURLController::get_homepage_link();
-			$homepageRecord = DataObject::get_one('SiteTree', sprintf(
-				'"SiteTree"."URLSegment" = \'%s\'',
-				Convert::raw2sql($homepageSegment)
+			$homepageRecord = DataObject::get_one('SiteTree', array(
+				'"SiteTree"."URLSegment"' => $homepageSegment
 			));
 			if($homepageRecord) $id = $homepageRecord->ID;
 		}
@@ -860,14 +891,14 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		$className = $this->stat('tree_class');
 
 		// Existing or new record?
-		$SQL_id = Convert::raw2sql($data['ID']);
-		if(substr($SQL_id,0,3) != 'new') {
-			$record = DataObject::get_by_id($className, $SQL_id);
+		$id = $data['ID'];
+		if(substr($id,0,3) != 'new') {
+			$record = DataObject::get_by_id($className, $id);
 			if($record && !$record->canEdit()) return Security::permissionFailure($this);
-			if(!$record || !$record->ID) throw new SS_HTTPResponse_Exception("Bad record ID #$SQL_id", 404);
+			if(!$record || !$record->ID) throw new SS_HTTPResponse_Exception("Bad record ID #$id", 404);
 		} else {
 			if(!singleton($this->stat('tree_class'))->canCreate()) return Security::permissionFailure($this);
-			$record = $this->getNewItem($SQL_id, false);
+			$record = $this->getNewItem($id, false);
 		}
 		
 		// TODO Coupling to SiteTree
@@ -896,7 +927,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			$record->doPublish();
 		} 
 
-		return $this->getResponseNegotiator()->respond($this->request);
+		return $this->getResponseNegotiator()->respond($this->getRequest());
 	}
 
 	/**
@@ -916,17 +947,17 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		
 		$newItem = new $className();
 
-	    if( !$suffix ) {
+		if( !$suffix ) {
 			$sessionTag = "NewItems." . $parentID . "." . $className;
-    		if(Session::get($sessionTag)) {
-		    	$suffix = '-' . Session::get($sessionTag);
-		    	Session::set($sessionTag, Session::get($sessionTag) + 1);
-		    }
-		    else
-		    	Session::set($sessionTag, 1);
+			if(Session::get($sessionTag)) {
+				$suffix = '-' . Session::get($sessionTag);
+				Session::set($sessionTag, Session::get($sessionTag) + 1);
+			}
+			else
+				Session::set($sessionTag, 1);
 
-		    	$id = $id . $suffix;
-	    }
+				$id = $id . $suffix;
+		}
 
 		$newItem->Title = _t(
 			'CMSMain.NEWPAGE',
@@ -939,7 +970,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		// DataObject::fieldExists only checks the current class, not the hierarchy
 		// This allows the CMS to set the correct sort value
 		if($newItem->castingHelper('Sort')) {
-			$newItem->Sort = DB::query("SELECT MAX(\"Sort\") FROM \"SiteTree\" WHERE \"ParentID\" = '" . Convert::raw2sql($parentID) . "'")->value() + 1;
+			$newItem->Sort = DB::prepared_query('SELECT MAX("Sort") FROM "SiteTree" WHERE "ParentID" = ?', array($parentID))->value() + 1;
 		}
 
 		if($setID) $newItem->ID = $id;
@@ -1005,7 +1036,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		);
 		
 		// Even if the record has been deleted from stage and live, it can be viewed in "archive mode"
-		return $this->getResponseNegotiator()->respond($this->request);
+		return $this->getResponseNegotiator()->respond($this->getRequest());
 	}
 
 	/**
@@ -1031,11 +1062,9 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		$restoredPage = Versioned::get_latest_version("SiteTree", $id);
 		if(!$restoredPage) 	return new SS_HTTPResponse("SiteTree #$id not found", 400);
 		
-		$record = Versioned::get_one_by_stage(
-			'SiteTree', 
-			'Live', 
-			sprintf("\"SiteTree_Live\".\"ID\" = '%d'", (int)$data['ID'])
-		);
+		$record = Versioned::get_one_by_stage('SiteTree', 'Live', array(
+			'"SiteTree_Live"."ID"' => $id
+		));
 
 		// a user can restore a page without publication rights, as it just adds a new draft state
 		// (this action should just be available when page has been "deleted from draft")
@@ -1054,7 +1083,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			))
 		);
 		
-		return $this->getResponseNegotiator()->respond($this->request);
+		return $this->getResponseNegotiator()->respond($this->getRequest());
 	}
 	
 	/**
@@ -1062,16 +1091,13 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	 * @see deletefromlive()
 	 */
 	public function delete($data, $form) {
-		$id = Convert::raw2sql($data['ID']);
-		$record = DataObject::get_one(
-			"SiteTree", 
-			sprintf("\"SiteTree\".\"ID\" = %d", $id)
-		);
+		Deprecation::notice('4.0', 'Delete from stage is deprecated. Use archive instead');
+		$id = $data['ID'];
+		$record = DataObject::get_by_id("SiteTree", $id);
 		if($record && !$record->canDelete()) return Security::permissionFailure();
 		if(!$record || !$record->ID) throw new SS_HTTPResponse_Exception("Bad record ID #$id", 404);
 		
-		// save ID and delete record
-		$recordID = $record->ID;
+		// Delete record
 		$record->delete();
 
 		$this->response->addHeader(
@@ -1080,7 +1106,35 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		);
 		
 		// Even if the record has been deleted from stage and live, it can be viewed in "archive mode"
-		return $this->getResponseNegotiator()->respond($this->request);
+		return $this->getResponseNegotiator()->respond($this->getRequest());
+	}
+
+	/**
+	 * Delete this page from both live and stage
+	 *
+	 * @param type $data
+	 * @param type $form
+	 */
+	public function archive($data, $form) {
+		$id = $data['ID'];
+		$record = DataObject::get_by_id("SiteTree", $id);
+		if(!$record || !$record->exists()) {
+			throw new SS_HTTPResponse_Exception("Bad record ID #$id", 404);
+		}
+		if(!$record->canArchive()) {
+			return Security::permissionFailure();
+		}
+
+		// Archive record
+		$record->doArchive();
+
+		$this->response->addHeader(
+			'X-Status',
+			rawurlencode(sprintf(_t('CMSMain.ARCHIVEDPAGE',"Archived page '%s'"), $record->Title))
+		);
+
+		// Even if the record has been deleted from stage and live, it can be viewed in "archive mode"
+		return $this->getResponseNegotiator()->respond($this->getRequest());
 	}
 
 	public function publish($data, $form) {
@@ -1103,7 +1157,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			rawurlencode(_t('CMSMain.REMOVEDPAGE',"Removed '{title}' from the published site", array('title' => $record->Title)))
 		);
 		
-		return $this->getResponseNegotiator()->respond($this->request);
+		return $this->getResponseNegotiator()->respond($this->getRequest());
 	}
 
 	/**
@@ -1112,7 +1166,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 	public function rollback() {
 		return $this->doRollback(array(
 			'ID' => $this->currentPageID(),
-			'Version' => $this->request->param('VersionID')
+			'Version' => $this->getRequest()->param('VersionID')
 		), null);
 	}
 
@@ -1154,10 +1208,10 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 		// The X-Pjax header forces a "full" content refresh on redirect.
 		$url = Controller::join_links(singleton('CMSPageEditController')->Link('show'), $record->ID);
 		$this->response->addHeader('X-ControllerURL', $url);
-		$this->request->addHeader('X-Pjax', 'Content');  
+		$this->getRequest()->addHeader('X-Pjax', 'Content');
 		$this->response->addHeader('X-Pjax', 'Content');  
 
-		return $this->getResponseNegotiator()->respond($this->request);
+		return $this->getResponseNegotiator()->respond($this->getRequest());
 	}
 
 	/**
@@ -1307,7 +1361,7 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			))
 		);
 		
-		return $this->getResponseNegotiator()->respond($this->request);
+		return $this->getResponseNegotiator()->respond($this->getRequest());
 	}
 
 	public function duplicate($request) {
@@ -1339,10 +1393,10 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			);
 			$url = Controller::join_links(singleton('CMSPageEditController')->Link('show'), $newPage->ID);
 			$this->response->addHeader('X-ControllerURL', $url);
-			$this->request->addHeader('X-Pjax', 'Content');  
+			$this->getRequest()->addHeader('X-Pjax', 'Content');
 			$this->response->addHeader('X-Pjax', 'Content');  
 			
-			return $this->getResponseNegotiator()->respond($this->request);
+			return $this->getResponseNegotiator()->respond($this->getRequest());
 		} else {
 			return new SS_HTTPResponse("CMSMain::duplicate() Bad ID: '$id'", 400);
 		}
@@ -1371,10 +1425,10 @@ class CMSMain extends LeftAndMain implements CurrentPageIdentifier, PermissionPr
 			);
 			$url = Controller::join_links(singleton('CMSPageEditController')->Link('show'), $newPage->ID);
 			$this->response->addHeader('X-ControllerURL', $url);
-			$this->request->addHeader('X-Pjax', 'Content');  
+			$this->getRequest()->addHeader('X-Pjax', 'Content');
 			$this->response->addHeader('X-Pjax', 'Content');  
 			
-			return $this->getResponseNegotiator()->respond($this->request);
+			return $this->getResponseNegotiator()->respond($this->getRequest());
 		} else {
 			return new SS_HTTPResponse("CMSMain::duplicatewithchildren() Bad ID: '$id'", 400);
 		}

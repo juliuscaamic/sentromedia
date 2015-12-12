@@ -54,7 +54,7 @@ class VirtualPage extends Page {
 		$record = $this->CopyContentFrom();
 
 		$allFields = $record->db();
-		if($hasOne = $record->has_one()) foreach($hasOne as $link) $allFields[$link . 'ID'] = "Int";
+		if($hasOne = $record->hasOne()) foreach($hasOne as $link) $allFields[$link . 'ID'] = "Int";
 		$virtualFields = array();
 		foreach($allFields as $field => $type) {
 			if(!in_array($field, $nonVirtualFields)) $virtualFields[] = $field;
@@ -265,8 +265,14 @@ class VirtualPage extends Page {
 			// On publication to live, copy from published source.
 			$performCopyFrom = true;
 		
-			$stageSourceVersion = DB::query("SELECT \"Version\" FROM \"SiteTree\" WHERE \"ID\" = $this->CopyContentFromID")->value();
-			$liveSourceVersion = DB::query("SELECT \"Version\" FROM \"SiteTree_Live\" WHERE \"ID\" = $this->CopyContentFromID")->value();
+			$stageSourceVersion = DB::prepared_query(
+				'SELECT "Version" FROM "SiteTree" WHERE "ID" = ?',
+				array($this->CopyContentFromID)
+			)->value();
+			$liveSourceVersion = DB::prepared_query(
+				'SELECT "Version" FROM "SiteTree_Live" WHERE "ID" = ?',
+				array($this->CopyContentFromID)
+			)->value();
 		
 			// We're going to create a new VP record in SiteTree_versions because the published
 			// version might not exist, unless we're publishing the latest version
@@ -281,7 +287,8 @@ class VirtualPage extends Page {
  		if($performCopyFrom && $this instanceof VirtualPage) {
 			// This flush is needed because the get_one cache doesn't respect site version :-(
 			singleton('SiteTree')->flushCache();
-			$source = DataObject::get_one("SiteTree",sprintf('"SiteTree"."ID" = %d', $this->CopyContentFromID));
+			// @todo Update get_one to support parameterised queries
+			$source = DataObject::get_by_id("SiteTree", $this->CopyContentFromID);
 			// Leave the updating of image tracking until after write, in case its a new record
 			$this->copyFrom($source, false);
 		}
@@ -318,15 +325,16 @@ class VirtualPage extends Page {
 					// Note: *_versions records are left intact
 					foreach(array('', 'Live') as $stage) {
 						if($stage) $removedTable = "{$removedTable}_{$stage}";
-						DB::query(sprintf('DELETE FROM "%s" WHERE "ID" = %d', $removedTable, $this->ID));					
+						DB::prepared_query("DELETE FROM \"$removedTable\" WHERE \"ID\" = ?", array($this->ID));
 					}
-				}	
+				}
 
 				// Also publish the change immediately to avoid inconsistent behaviour between
 				// a non-virtual draft and a virtual live record (e.g. republishing the original record
 				// shouldn't republish the - now unrelated - changes on the ex-VirtualPage draft).
 				// Copies all stage fields to live as well.
-				$source = DataObject::get_one("SiteTree",sprintf('"SiteTree"."ID" = %d', $this->CopyContentFromID));
+				// @todo Update get_one to support parameterised queries
+				$source = DataObject::get_by_id("SiteTree", $this->CopyContentFromID);
 				$this->copyFrom($source);
 				$this->publish('Stage', 'Live');
 
@@ -336,7 +344,7 @@ class VirtualPage extends Page {
 		}
 	}
 
-	public function validate() {
+	protected function validate() {
 		$result = parent::validate();
 
 		// "Can be root" validation
@@ -509,6 +517,7 @@ class VirtualPage_Controller extends Page_Controller {
 			}
 		}
 		parent::init();
+		$this->__call('init', array());
 	}
 
 	public function loadcontentall() {

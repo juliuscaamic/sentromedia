@@ -79,7 +79,7 @@ class SS_ConfigStaticManifest {
 			$static = $this->statics[$class][$name];
 
 			if ($static['access'] != T_PRIVATE) {
-				Deprecation::notice('3.2.0', "Config static $class::\$$name must be marked as private",
+				Deprecation::notice('4.0', "Config static $class::\$$name must be marked as private",
 					Deprecation::SCOPE_GLOBAL);
 				// Don't warn more than once per static
 				$this->statics[$class][$name]['access'] = T_PRIVATE;
@@ -320,7 +320,8 @@ class SS_ConfigStaticManifest_Parser {
 				// NOP
 			}
 			else {
-				user_error('Unexpected token when building static manifest: '.print_r($token, true), E_USER_ERROR);
+				user_error('Unexpected token ("' . token_name($type) . '") when building static manifest in class "'
+					. $class . '": '.print_r($token, true), E_USER_ERROR);
 			}
 		}
 

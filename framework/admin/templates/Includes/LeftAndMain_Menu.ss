@@ -8,7 +8,7 @@
 		</div>
 	
 		<div class="cms-login-status">
-			<a href="Security/logout" class="logout-link" title="<% _t('LeftAndMain_Menu_ss.LOGOUT','Log out') %>"><% _t('LeftAndMain_Menu_ss.LOGOUT','Log out') %></a>
+			<a href="$LogoutURL" class="logout-link" title="<% _t('LeftAndMain_Menu_ss.LOGOUT','Log out') %>"><% _t('LeftAndMain_Menu_ss.LOGOUT','Log out') %></a>
 			<% with $CurrentMember %>
 				<span>
 					<% _t('LeftAndMain_Menu_ss.Hello','Hi') %>
@@ -34,6 +34,8 @@
 	</div>
 		
 	<div class="cms-panel-toggle south">
+		<button class="sticky-toggle" type="button" title="Sticky nav">Sticky nav</button>
+		<span class="sticky-status-indicator">auto</span>
 		<a class="toggle-expand" href="#"><span>&raquo;</span></a>
 		<a class="toggle-collapse" href="#"><span>&laquo;</span></a>
 	</div>

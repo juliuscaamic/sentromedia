@@ -2,6 +2,8 @@
 
 /**
  * Provides a security interface functionality within the cms
+ * @package framework
+ * @subpackage security
  */
 class CMSSecurity extends Security {
 
@@ -50,7 +52,7 @@ class CMSSecurity extends Security {
 	 * @return Member
 	 */
 	public function getTargetMember() {
-		if($tempid = $this->request->requestVar('tempid')) {
+		if($tempid = $this->getRequest()->requestVar('tempid')) {
 			return Member::member_from_tempid($tempid);
 		}
 	}
@@ -60,8 +62,8 @@ class CMSSecurity extends Security {
 		return $this;
 	}
 
-	protected function getLoginMessage() {
-		return parent::getLoginMessage()
+	protected function getLoginMessage(&$messageType = null) {
+		return parent::getLoginMessage($messageType)
 			?: _t(
 				'CMSSecurity.LoginMessage',
 				'<p>If you have any unsaved work you can return to where you left off by logging back in below.</p>'
@@ -168,9 +170,14 @@ PHP
 		user_error('Passed invalid authentication method', E_USER_ERROR);
 	}
 
-	protected function getTemplatesFor($action) {
+	public function getTemplatesFor($action) {
 		return array("CMSSecurity_{$action}", "CMSSecurity")
 			+ parent::getTemplatesFor($action);
+	}
+
+	public function getIncludeTemplate($name) {
+		return array("CMSSecurity_{$name}")
+			+ parent::getIncludeTemplate($name);
 	}
 
 	/**
@@ -186,7 +193,7 @@ PHP
 
 		// Get redirect url
 		$controller = $this->getResponseController(_t('CMSSecurity.SUCCESS', 'Success'));
-		$backURL = $this->request->requestVar('BackURL')
+		$backURL = $this->getRequest()->requestVar('BackURL')
 			?: Session::get('BackURL')
 			?: Director::absoluteURL(AdminRootController::config()->url_base, true);
 

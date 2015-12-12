@@ -29,11 +29,12 @@ class RootURLController extends Controller {
 	 */
 	static public function get_homepage_link() {
 		if(!self::$cached_homepage_link) {
-			// TODO Move to 'homepagefordomain' module
+			// @todo Move to 'homepagefordomain' module
 			if(class_exists('HomepageForDomainExtension')) {
 				$host       = str_replace('www.', null, $_SERVER['HTTP_HOST']);
-				$SQL_host   = Convert::raw2sql($host);
-				$candidates = DataObject::get('SiteTree', "\"HomepageForDomain\" LIKE '%$SQL_host%'");
+				$candidates = SiteTree::get()->where(array(
+					'"SiteTree"."HomepageForDomain" LIKE ?' => "%$host%"
+				));
 				if($candidates) foreach($candidates as $candidate) {
 					if(preg_match('/(,|^) *' . preg_quote($host) . ' *(,|$)/', $candidate->HomepageForDomain)) {
 						self::$cached_homepage_link = trim($candidate->RelativeLink(true), '/');
@@ -62,22 +63,22 @@ class RootURLController extends Controller {
 	 * Set the URL Segment used for your homepage when it is created by dev/build.
 	 * This allows you to use home page URLs other than the default "home".
 	 *
-	 * @deprecated 3.2 Use the "RootURLController.default_homepage_link" config setting instead
+	 * @deprecated 4.0 Use the "RootURLController.default_homepage_link" config setting instead
 	 * @param string $urlsegment the URL segment for your home page
 	 */
 	static public function set_default_homepage_link($urlsegment = "home") {
-		Deprecation::notice('3.2', 'Use the "RootURLController.default_homepage_link" config setting instead');
+		Deprecation::notice('4.0', 'Use the "RootURLController.default_homepage_link" config setting instead');
 		Config::inst()->update('RootURLController', 'default_homepage_link', $urlsegment);
 	}
 
 	/**
 	 * Gets the link that denotes the homepage if there is not one explicitly defined for this HTTP_HOST value.
 	 *
-	 * @deprecated 3.2 Use the "RootURLController.default_homepage_link" config setting instead
+	 * @deprecated 4.0 Use the "RootURLController.default_homepage_link" config setting instead
 	 * @return string
 	 */
 	static public function get_default_homepage_link() {
-		Deprecation::notice('3.2', 'Use the "RootURLController.default_homepage_link" config setting instead');
+		Deprecation::notice('4.0', 'Use the "RootURLController.default_homepage_link" config setting instead');
 		return Config::inst()->get('RootURLController', 'default_homepage_link');
 	}
 	
@@ -117,7 +118,7 @@ class RootURLController extends Controller {
 		$this->pushCurrent();
 		$this->init();
 		
-		if(!DB::isActive() || !ClassInfo::hasTable('SiteTree')) {
+		if(!DB::is_active() || !ClassInfo::hasTable('SiteTree')) {
 			$this->response = new SS_HTTPResponse();
 			$this->response->redirect(Director::absoluteBaseURL() . 'dev/build?returnURL=' . (isset($_GET['url']) ? urlencode($_GET['url']) : null));
 			return $this->response;

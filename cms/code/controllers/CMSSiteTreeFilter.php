@@ -13,7 +13,7 @@
  * @package cms
  * @subpackage content
  */
-abstract class CMSSiteTreeFilter extends Object {
+abstract class CMSSiteTreeFilter extends Object implements LeftAndMain_SearchFilter {
 
 	/**
 	 * @var Array Search parameters, mostly properties on {@link SiteTree}.
@@ -22,9 +22,21 @@ abstract class CMSSiteTreeFilter extends Object {
 	protected $params = array();
 	
 	/**
-	 * @var Array
+	 * List of filtered items and all their parents
+	 * 
+	 * @var array
 	 */
 	protected $_cache_ids = null;
+
+
+	/**
+	 * Subset of $_cache_ids which include only items that appear directly in search results.
+	 * When highlighting these, item IDs in this subset should be visually distinguished from
+	 * others in the complete set.
+	 *
+	 * @var array
+	 */
+	protected $_cache_highlight_ids = null;
 	
 	/**
 	 * @var Array
@@ -32,7 +44,7 @@ abstract class CMSSiteTreeFilter extends Object {
 	protected $_cache_expanded = array();
 	
 	/**
-	 * @var String 
+	 * @var string 
 	 */
 	protected $childrenMethod = null;
 
@@ -75,20 +87,23 @@ abstract class CMSSiteTreeFilter extends Object {
 		parent::__construct();
 	}
 	
-	/**
-	 * Method on {@link Hierarchy} objects which is used to traverse into children relationships.
-	 *
-	 * @return String
-	 */
 	public function getChildrenMethod() {
 		return $this->childrenMethod;
 	}
 
-	/**
-	 * Method on {@link Hierarchy} objects which is used find the number of children for a parent page
-	 */
 	public function getNumChildrenMethod() {
 		return $this->numChildrenMethod;
+	}
+
+	public function getPageClasses($page) {
+		if($this->_cache_ids === NULL) {
+			$this->populateIDs();
+		}
+
+		// If directly selected via filter, apply highlighting
+		if(!empty($this->_cache_highlight_ids[$page->ID])) {
+			return 'filtered-item';
+		}
 	}
 
 	/**
@@ -113,6 +128,7 @@ abstract class CMSSiteTreeFilter extends Object {
 	protected function populateIDs() {
 		$parents = array();
 		$this->_cache_ids = array();
+		$this->_cache_highlight_ids = array();
 		
 		if($pages = $this->pagesIncluded()) {
 			
@@ -121,6 +137,7 @@ abstract class CMSSiteTreeFilter extends Object {
 			foreach($pages as $pageArr) {
 				$parents[$pageArr['ParentID']] = true;
 				$this->_cache_ids[$pageArr['ID']] = true;
+				$this->_cache_highlight_ids[$pageArr['ID']] = true;
 			}
 
 			while(!empty($parents)) {
@@ -136,17 +153,12 @@ abstract class CMSSiteTreeFilter extends Object {
 		}
 	}
 	
-	/**
-	 * Returns TRUE if the given page should be included in the tree.
-	 * Caution: Does NOT check view permissions on the page.
-	 * 
-	 * @param SiteTree $page
-	 * @return Boolean
-	 */
 	public function isPageIncluded($page) {
-		if($this->_cache_ids === NULL) $this->populateIDs();
+		if($this->_cache_ids === NULL) {
+			$this->populateIDs();
+		}
 
-		return (isset($this->_cache_ids[$page->ID]) && $this->_cache_ids[$page->ID]);
+		return !empty($this->_cache_ids[$page->ID]);
 	}
 	
 	/**
@@ -217,8 +229,11 @@ abstract class CMSSiteTreeFilter extends Object {
  * pages that is currently published.
  *
  * Note that this does not check canView permissions that might hide pages from certain visitors
+ *
+ * @package cms
+ * @subpackage content
  */
-class CMSSIteTreeFilter_PublishedPages extends CMSSiteTreeFilter {
+class CMSSiteTreeFilter_PublishedPages extends CMSSiteTreeFilter {
 
 	/**
 	 * @return string
@@ -247,7 +262,7 @@ class CMSSIteTreeFilter_PublishedPages extends CMSSiteTreeFilter {
 		$pages = Versioned::get_including_deleted('SiteTree');
 		$pages = $this->applyDefaultFilters($pages);
 		$pages = $pages->filterByCallback(function($page) {
-			return $page->ExistsOnLive;
+			return $page->getExistsOnLive();
 		});
 		return $pages;
 	}
@@ -274,7 +289,7 @@ class CMSSiteTreeFilter_DeletedPages extends CMSSiteTreeFilter {
 	protected $numChildrenMethod = 'numHistoricalChildren';
 	
 	static public function title() {
-		return _t('CMSSiteTreeFilter_DeletedPages.Title', "All pages, including deleted");
+		return _t('CMSSiteTreeFilter_DeletedPages.Title', "All pages, including archived");
 	}
 	
 	public function getFilteredPages() {
@@ -293,7 +308,7 @@ class CMSSiteTreeFilter_DeletedPages extends CMSSiteTreeFilter {
 class CMSSiteTreeFilter_ChangedPages extends CMSSiteTreeFilter {
 	
 	static public function title() {
-		return _t('CMSSiteTreeFilter_ChangedPages.Title', "Changed pages");
+		return _t('CMSSiteTreeFilter_ChangedPages.Title', "Modified pages");
 	}
 	
 	public function getFilteredPages() {
@@ -327,7 +342,7 @@ class CMSSiteTreeFilter_StatusRemovedFromDraftPages extends CMSSiteTreeFilter {
 		$pages = $this->applyDefaultFilters($pages);
 		$pages = $pages->filterByCallback(function($page) {
 			// If page is removed from stage but not live
-			return $page->IsDeletedFromStage && $page->ExistsOnLive;
+			return $page->getIsDeletedFromStage() && $page->getExistsOnLive();
 		});
 		return $pages;
 	}	
@@ -342,7 +357,7 @@ class CMSSiteTreeFilter_StatusRemovedFromDraftPages extends CMSSiteTreeFilter {
 class CMSSiteTreeFilter_StatusDraftPages extends CMSSiteTreeFilter {
 	
 	static public function title() {
-		return _t('CMSSiteTreeFilter_StatusDraftPages.Title', 'Draft unpublished pages');
+		return _t('CMSSiteTreeFilter_StatusDraftPages.Title', 'Draft pages');
 	}
 	
 	/**
@@ -356,7 +371,7 @@ class CMSSiteTreeFilter_StatusDraftPages extends CMSSiteTreeFilter {
 		$pages = $this->applyDefaultFilters($pages);
 		$pages = $pages->filterByCallback(function($page) {
 			// If page exists on stage but not on live
-			return (!$page->IsDeletedFromStage && $page->IsAddedToStage);
+			return (!$page->getIsDeletedFromStage() && $page->getIsAddedToStage());
 		});
 		return $pages;
 	}	
@@ -381,7 +396,7 @@ class CMSSiteTreeFilter_StatusDeletedPages extends CMSSiteTreeFilter {
 	protected $numChildrenMethod = 'numHistoricalChildren';
 	
 	static public function title() {
-		return _t('CMSSiteTreeFilter_StatusDeletedPages.Title', 'Deleted pages');
+		return _t('CMSSiteTreeFilter_StatusDeletedPages.Title', 'Archived pages');
 	}
 	
 	/**
@@ -396,7 +411,7 @@ class CMSSiteTreeFilter_StatusDeletedPages extends CMSSiteTreeFilter {
 
 		$pages = $pages->filterByCallback(function($page) {
 			// Doesn't exist on either stage or live
-			return $page->IsDeletedFromStage && !$page->ExistsOnLive;
+			return $page->getIsDeletedFromStage() && !$page->getExistsOnLive();
 		});
 		return $pages;
 	}	

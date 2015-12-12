@@ -177,7 +177,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	
 	/**
 	 * @config
-	 * @var String Description of the class functionality, typically shown to a user
+	 * @var string Description of the class functionality, typically shown to a user
 	 * when selecting which page type to create. Translated through {@link provideI18nEntities()}.
 	 */
 	private static $description = 'Generic content page';
@@ -241,69 +241,69 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * by deleting all children when the their parent is deleted (TRUE),
 	 * or rather preserve this data even if its not reachable through any navigation path (FALSE).
 	 * 
-	 * @deprecated 3.2 Use the "SiteTree.enforce_strict_hierarchy" config setting instead
+	 * @deprecated 4.0 Use the "SiteTree.enforce_strict_hierarchy" config setting instead
 	 * @param boolean
 	 */
 	static public function set_enforce_strict_hierarchy($to) {
-		Deprecation::notice('3.2', 'Use the "SiteTree.enforce_strict_hierarchy" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SiteTree.enforce_strict_hierarchy" config setting instead');
 		Config::inst()->update('SiteTree', 'enforce_strict_hierarchy', $to);
 	}
 	
 	/**
-	 * @deprecated 3.2 Use the "SiteTree.enforce_strict_hierarchy" config setting instead
+	 * @deprecated 4.0 Use the "SiteTree.enforce_strict_hierarchy" config setting instead
 	 * @return boolean
 	 */
 	static public function get_enforce_strict_hierarchy() {
-		Deprecation::notice('3.2', 'Use the "SiteTree.enforce_strict_hierarchy" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SiteTree.enforce_strict_hierarchy" config setting instead');
 		return Config::inst()->get('SiteTree', 'enforce_strict_hierarchy');
 	}
 
 	/**
 	 * Returns TRUE if nested URLs (e.g. page/sub-page/) are currently enabled on this site.
 	 *
-	 * @deprecated 3.2 Use the "SiteTree.nested_urls" config setting instead
+	 * @deprecated 4.0 Use the "SiteTree.nested_urls" config setting instead
 	 * @return bool
 	 */
 	static public function nested_urls() {
-		Deprecation::notice('3.2', 'Use the "SiteTree.nested_urls" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SiteTree.nested_urls" config setting instead');
 		return Config::inst()->get('SiteTree', 'nested_urls');
 	}
 	
 	/**
-	 * @deprecated 3.2 Use the "SiteTree.nested_urls" config setting instead
+	 * @deprecated 4.0 Use the "SiteTree.nested_urls" config setting instead
 	 */
 	static public function enable_nested_urls() {
-		Deprecation::notice('3.2', 'Use the "SiteTree.nested_urls" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SiteTree.nested_urls" config setting instead');
 		Config::inst()->update('SiteTree', 'nested_urls', true);
 	}
 	
 	/**
-	 * @deprecated 3.2 Use the "SiteTree.nested_urls" config setting instead
+	 * @deprecated 4.0 Use the "SiteTree.nested_urls" config setting instead
 	 */
 	static public function disable_nested_urls() {
-		Deprecation::notice('3.2', 'Use the "SiteTree.nested_urls" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SiteTree.nested_urls" config setting instead');
 		Config::inst()->update('SiteTree', 'nested_urls', false);
 	}
 	
 	/**
 	 * Set the (re)creation of default pages on /dev/build
 	 *
-	 * @deprecated 3.2 Use the "SiteTree.create_default_pages" config setting instead
+	 * @deprecated 4.0 Use the "SiteTree.create_default_pages" config setting instead
 	 * @param bool $option
 	 */
 	static public function set_create_default_pages($option = true) {
-		Deprecation::notice('3.2', 'Use the "SiteTree.create_default_pages" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SiteTree.create_default_pages" config setting instead');
 		Config::inst()->update('SiteTree', 'create_default_pages', $option);
 	}
 
 	/**
 	 * Return true if default pages should be created on /dev/build.
 	 *
-	 * @deprecated 3.2 Use the "SiteTree.create_default_pages" config setting instead
+	 * @deprecated 4.0 Use the "SiteTree.create_default_pages" config setting instead
 	 * @return bool
 	 */
 	static public function get_create_default_pages() {
-		Deprecation::notice('3.2', 'Use the "SiteTree.create_default_pages" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SiteTree.create_default_pages" config setting instead');
 		return Config::inst()->get('SiteTree', 'create_default_pages');
 	}
 	
@@ -327,22 +327,22 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			$link = RootURLController::get_homepage_link();
 		}
 		
-		$parts = Convert::raw2sql(preg_split('|/+|', $link));
+		$parts = preg_split('|/+|', $link);
 		
 		// Grab the initial root level page to traverse down from.
 		$URLSegment = array_shift($parts);
-		$sitetree   = DataObject::get_one (
-			'SiteTree',
-			"\"SiteTree\".\"URLSegment\" = '$URLSegment'" . (
-				self::config()->nested_urls ? ' AND "SiteTree"."ParentID" = 0' : ''
-			),
-			$cache
-		);
+		$conditions = array('"SiteTree"."URLSegment"' => rawurlencode($URLSegment));
+		if(self::config()->nested_urls) {
+			$conditions[] = array('"SiteTree"."ParentID"' => 0);
+		}
+		$sitetree = DataObject::get_one('SiteTree', $conditions, $cache);
 		
 		/// Fall back on a unique URLSegment for b/c.
-		if(!$sitetree
+		if(	!$sitetree
 			&& self::config()->nested_urls
-			&& $page = DataObject::get_one('SiteTree', "\"SiteTree\".\"URLSegment\" = '$URLSegment'", $cache)
+			&& $page = DataObject::get_one('SiteTree', array(
+				'"SiteTree"."URLSegment"' => $URLSegment
+			), $cache)
 		) {
 			return $page;
 		}
@@ -363,9 +363,10 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		
 		// Traverse down the remaining URL segments and grab the relevant SiteTree objects.
 		foreach($parts as $segment) {
-			$next = DataObject::get_one (
-				'SiteTree',
-				"\"SiteTree\".\"URLSegment\" = '$segment' AND \"SiteTree\".\"ParentID\" = $sitetree->ID",
+			$next = DataObject::get_one('SiteTree', array(
+					'"SiteTree"."URLSegment"' => $segment, 
+					'"SiteTree"."ParentID"' => $sitetree->ID
+				),
 				$cache
 			);
 			
@@ -438,11 +439,11 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		if (
 			   !($page = DataObject::get_by_id('SiteTree', $arguments['id']))         // Get the current page by ID.
 			&& !($page = Versioned::get_latest_version('SiteTree', $arguments['id'])) // Attempt link to old version.
-			&& !($page = DataObject::get_one('ErrorPage', '"ErrorPage"."ErrorCode" = \'404\'')) // Link to 404 page.
+			&& !($page = DataObject::get_one('ErrorPage', array('"ErrorPage"."ErrorCode"' => 404)))   // Link to 404 page directly.
 		) {
 			 return; // There were no suitable matches at all.
 		}
-		
+
 		$link = Convert::raw2att($page->Link());
 		
 		if($content) {
@@ -508,7 +509,12 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 */
 	public function RelativeLink($action = null) {
 		if($this->ParentID && self::config()->nested_urls) {
-			$base = $this->Parent()->RelativeLink($this->URLSegment);
+			$parent = $this->Parent();
+			// If page is removed select parent from version history (for archive page view)
+			if((!$parent || !$parent->exists()) && $this->IsDeletedFromStage) {
+				$parent = Versioned::get_latest_version('SiteTree', $this->ParentID);
+			}
+			$base = $parent->RelativeLink($this->URLSegment);
 		} elseif(!$action && $this->URLSegment == RootURLController::get_homepage_link()) {
 			// Unset base for root-level homepages.
 			// Note: Homepages with action parameters (or $action === true) 
@@ -536,7 +542,9 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	public function getAbsoluteLiveLink($includeStageEqualsLive = true) {
 		$oldStage = Versioned::current_stage();
 		Versioned::reading_stage('Live');
-		$live = Versioned::get_one_by_stage('SiteTree', 'Live', '"SiteTree"."ID" = ' . $this->ID);
+		$live = Versioned::get_one_by_stage('SiteTree', 'Live', array(
+			'"SiteTree"."ID"' => $this->ID
+		));
 		if($live) {
 			$link = $live->AbsoluteLink();
 			if($includeStageEqualsLive) $link .= '?stage=Live';
@@ -714,13 +722,32 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	/**
 	 * Return a breadcrumb trail to this page. Excludes "hidden" pages (with ShowInMenus=0) by default.
 	 *
-	 * @param int         $maxDepth The maximum depth to traverse.
-	 * @param bool        $unlinked Do not make page names links
-	 * @param bool|string $stopAtPageType ClassName of a page to stop the upwards traversal.
-	 * @param bool        $showHidden Include pages marked with the attribute ShowInMenus = 0
+	 * @param int $maxDepth The maximum depth to traverse.
+	 * @param boolean $unlinked Whether to link page titles.
+	 * @param boolean|string $stopAtPageType ClassName of a page to stop the upwards traversal.
+	 * @param boolean $showHidden Include pages marked with the attribute ShowInMenus = 0
 	 * @return HTMLText The breadcrumb trail.
 	 */
 	public function Breadcrumbs($maxDepth = 20, $unlinked = false, $stopAtPageType = false, $showHidden = false) {
+		$pages = $this->getBreadcrumbItems($maxDepth, $stopAtPageType, $showHidden);
+		$template = new SSViewer('BreadcrumbsTemplate');
+		return $template->process($this->customise(new ArrayData(array(
+			"Pages" => $pages,
+			"Unlinked" => $unlinked
+		))));
+	}
+
+
+	/**
+	 * Returns a list of breadcrumbs for the current page.
+	 *
+	 * @param int $maxDepth The maximum depth to traverse.
+	 * @param boolean|string $stopAtPageType ClassName of a page to stop the upwards traversal.
+	 * @param boolean $showHidden Include pages marked with the attribute ShowInMenus = 0
+	 *
+	 * @return ArrayList
+	*/
+	public function getBreadcrumbItems($maxDepth = 20, $stopAtPageType = false, $showHidden = false) {
 		$page = $this;
 		$pages = array();
 		
@@ -735,13 +762,10 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			
 			$page = $page->Parent;
 		}
-		
-		$template = new SSViewer('BreadcrumbsTemplate');
-		
-		return $template->process($this->customise(new ArrayData(array(
-			'Pages' => new ArrayList(array_reverse($pages))
-		))));
+
+		return new ArrayList(array_reverse($pages));
 	}
+
 
 	/**
 	 * Make this page a child of another page.
@@ -765,8 +789,8 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * @return SiteTree Parent of this page
 	 */
 	public function getParent() {
-		if ($this->getField("ParentID")) {
-			return DataObject::get_one("SiteTree", "\"SiteTree\".\"ID\" = " . $this->getField("ParentID"));
+		if ($parentID = $this->getField("ParentID")) {
+			return DataObject::get_by_id("SiteTree", $parentID);
 		}
 	}
 
@@ -838,6 +862,11 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * @return bool True if the current user can add children
 	 */
 	public function canAddChildren($member = null) {
+		// Disable adding children to archived pages
+		if($this->getIsDeletedFromStage()) {
+			return false;
+		}
+
 		if(!$member || !(is_a($member, 'Member')) || is_numeric($member)) {
 			$member = Member::currentUserID();
 		}
@@ -1193,7 +1222,8 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 				return $result;
 			}
 
-			$SQL_idList = implode($ids, ", ");
+			// Placeholder for parameterised ID list
+			$idPlaceholders = DB::placeholders($ids);
 
 			// If page can't be viewed, don't grant edit permissions to do - implement can_view_multiple(), so this can
 			// be enabled
@@ -1210,16 +1240,22 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 				// Start by filling the array with the pages that actually exist
 				$table = ($stage=='Stage') ? "SiteTree" : "SiteTree_$stage";
 				
-				$result = array_fill_keys(
-					($ids) ? DB::query("SELECT \"ID\" FROM \"$table\" WHERE \"ID\" IN (".implode(", ", $ids).")")->column() : array(),
-					false
-				);
+				if($ids) {
+					$idQuery = "SELECT \"ID\" FROM \"$table\" WHERE \"ID\" IN ($idPlaceholders)";
+					$stageIds = DB::prepared_query($idQuery, $ids)->column();
+				} else {
+					$stageIds = array();
+				}
+				$result = array_fill_keys($stageIds, false);
 				
 				// Get the uninherited permissions
 				$uninheritedPermissions = Versioned::get_by_stage("SiteTree", $stage)
-					->where("(\"$typeField\" = 'LoggedInUsers' OR
+					->where(array(
+						"(\"$typeField\" = 'LoggedInUsers' OR
 						(\"$typeField\" = 'OnlyTheseUsers' AND \"$groupJoinTable\".\"SiteTreeID\" IS NOT NULL))
-						AND \"SiteTree\".\"ID\" IN ($SQL_idList)")
+						AND \"SiteTree\".\"ID\" IN ($idPlaceholders)"
+						=> $ids
+					))
 					->leftJoin($groupJoinTable, "\"$groupJoinTable\".\"SiteTreeID\" = \"SiteTree\".\"ID\" AND \"$groupJoinTable\".\"GroupID\" IN ($SQL_groupList)");
 				
 				if($uninheritedPermissions) {
@@ -1228,8 +1264,11 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 				}
 
 				// Get permissions that are inherited
-				$potentiallyInherited = Versioned::get_by_stage("SiteTree", $stage, "\"$typeField\" = 'Inherit'
-					AND \"SiteTree\".\"ID\" IN ($SQL_idList)");
+				$potentiallyInherited = Versioned::get_by_stage(
+					"SiteTree",
+					$stage, 
+					array("\"$typeField\" = 'Inherit' AND \"SiteTree\".\"ID\" IN ($idPlaceholders)" => $ids)
+				);
 
 				if($potentiallyInherited) {
 					// Group $potentiallyInherited by ParentID; we'll look at the permission of all those parents and
@@ -1317,10 +1356,12 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		// You can only delete pages that you can edit
 		$editableIDs = array_keys(array_filter(self::can_edit_multiple($ids, $memberID)));
 		if($editableIDs) {
-			$idList = implode(",", $editableIDs);
 		
 			// You can only delete pages whose children you can delete
-			$childRecords = DataObject::get("SiteTree", "\"ParentID\" IN ($idList)");
+			$editablePlaceholders = DB::placeholders($editableIDs);
+			$childRecords = SiteTree::get()->where(array(
+				"\"SiteTree\".\"ParentID\" IN ($editablePlaceholders)" => $editableIDs
+			));
 			if($childRecords) {
 				$children = $childRecords->map("ID", "ParentID");
 
@@ -1475,9 +1516,9 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		// schema migration
 		// @todo Move to migration task once infrastructure is implemented
 		if($this->class == 'SiteTree') {
-			$conn = DB::getConn();
+			$conn = DB::get_schema();
 			// only execute command if fields haven't been renamed to _obsolete_<fieldname> already by the task
-			if(array_key_exists('Viewers', $conn->fieldList('SiteTree'))) {
+			if($conn->hasField('SiteTree' ,'Viewers')) {
 				$task = new UpgradeSiteTreePermissionSchemaTask();
 				$task->run(new SS_HTTPRequest('GET','/'));
 			}
@@ -1490,11 +1531,18 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		// If Sort hasn't been set, make this page come after it's siblings
 		if(!$this->Sort) {
 			$parentID = ($this->ParentID) ? $this->ParentID : 0;
-			$this->Sort = DB::query("SELECT MAX(\"Sort\") + 1 FROM \"SiteTree\" WHERE \"ParentID\" = $parentID")->value();
+			$this->Sort = DB::prepared_query(
+				"SELECT MAX(\"Sort\") + 1 FROM \"SiteTree\" WHERE \"ParentID\" = ?", 
+				array($parentID)
+			)->value();
 		}
 
 		// If there is no URLSegment set, generate one from Title
-		if((!$this->URLSegment || $this->URLSegment == 'new-page') && $this->Title) {
+		$defaultSegment = $this->generateURLSegment(_t(
+			'CMSMain.NEWPAGE',
+			array('pagetype' => $this->i18n_singular_name())
+		));
+		if((!$this->URLSegment || $this->URLSegment == $defaultSegment) && $this->Title) {
 			$this->URLSegment = $this->generateURLSegment($this->Title);
 		} else if($this->isChanged('URLSegment', 2)) {
 			// Do a strict check on change level, to avoid double encoding caused by
@@ -1582,7 +1630,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		$this->_cache_statusFlags = null;
 	}
 	
-	public function validate() {
+	protected function validate() {
 		$result = parent::validate();
 
 		// Allowed children validation 
@@ -1640,15 +1688,13 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			if(class_exists($this->URLSegment) && is_subclass_of($this->URLSegment, 'RequestHandler')) return false;
 		}
 		
-		$IDFilter     = ($this->ID) ? "AND \"SiteTree\".\"ID\" <> $this->ID" :  null;
-		$parentFilter = null;
-		
+		// Filters by url, id, and parent
+		$filter = array('"SiteTree"."URLSegment"' => $this->URLSegment);
+		if($this->ID) {
+			$filter['"SiteTree"."ID" <> ?'] = $this->ID;
+		}
 		if(self::config()->nested_urls) {
-			if($this->ParentID) {
-				$parentFilter = " AND \"SiteTree\".\"ParentID\" = $this->ParentID";
-			} else {
-				$parentFilter = ' AND "SiteTree"."ParentID" = 0';
-			}
+			$filter['"SiteTree"."ParentID"'] = $this->ParentID ? $this->ParentID : 0;
 		}
 		
 		$votes = array_filter(
@@ -1659,11 +1705,9 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			return min($votes);
 		}
 
-		$segment = Convert::raw2sql($this->URLSegment);
-		$existingPage = DataObject::get_one(
-			'SiteTree', 
-			"\"SiteTree\".\"URLSegment\" = '$segment' $IDFilter $parentFilter"
-		);
+		// Check existence
+		$existingPage = DataObject::get_one('SiteTree', $filter);
+		if ($existingPage) return false;
 
 		return !($existingPage);
 		}
@@ -1698,11 +1742,9 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * @return string
 	 */
 	public function getStageURLSegment() {
-		$stageRecord = Versioned::get_one_by_stage(
-			'SiteTree', 
-			'Stage', 
-			"\"SiteTree\".\"ID\" = $this->ID"
-		);
+		$stageRecord = Versioned::get_one_by_stage('SiteTree', 'Stage', array(
+			'"SiteTree"."ID"' => $this->ID
+		));
 		return ($stageRecord) ? $stageRecord->URLSegment : null;
 	}
 	
@@ -1712,11 +1754,9 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * @return string
 	 */
 	public function getLiveURLSegment() {
-		$liveRecord = Versioned::get_one_by_stage(
-			'SiteTree', 
-			'Live', 
-			"\"SiteTree\".\"ID\" = $this->ID"
-		);
+		$liveRecord = Versioned::get_one_by_stage('SiteTree', 'Live', array(
+			'"SiteTree"."ID"' => $this->ID
+		));
 		return ($liveRecord) ? $liveRecord->URLSegment : null;
 	}
 	
@@ -1728,7 +1768,10 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		// Update the content without actually creating a new version
 		foreach(array("SiteTree_Live", "SiteTree") as $table) {
 			// Published site
-			$published = DB::query("SELECT * FROM  \"$table\" WHERE \"ID\" = $this->ID")->record();
+			$published = DB::prepared_query(
+				"SELECT * FROM  \"$table\" WHERE \"ID\" = ?",
+				array($this->ID)
+			)->record();
 			$origPublished = $published;
 
 			foreach($fields as $fieldName => $fieldType) {
@@ -1738,8 +1781,8 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 				if(isset($published[$fieldName])) {
 					$published[$fieldName] = str_replace($old, $new, $published[$fieldName], $numReplaced);
 					if($numReplaced) {
-						DB::query("UPDATE \"$table\" SET \"$fieldName\" = '" 
-							. Convert::raw2sql($published[$fieldName]) . "' WHERE \"ID\" = $this->ID");
+						$query = sprintf('UPDATE "%s" SET "%s" = ? WHERE "ID" = ?', $table, $fieldName);
+						DB::prepared_query($query, array($published[$fieldName], $this->ID));
 							
 						// Tell static caching to update itself
 						if($table == 'SiteTree_Live') {
@@ -1766,17 +1809,17 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		}
 		
 		// Content links
-        $items = new ArrayList();
+		$items = new ArrayList();
 
-        // We merge all into a regular SS_List, because DataList doesn't support merge
-        if($contentLinks = $this->BackLinkTracking()) {
-        	$linkList = new ArrayList();
-            foreach($contentLinks as $item) {
-            	$item->DependentLinkType = 'Content link';
-            	$linkList->push($item);
-        }
+		// We merge all into a regular SS_List, because DataList doesn't support merge
+		if($contentLinks = $this->BackLinkTracking()) {
+			$linkList = new ArrayList();
+			foreach($contentLinks as $item) {
+				$item->DependentLinkType = 'Content link';
+				$linkList->push($item);
+			}
 			$items->merge($linkList);
-        }
+		}
 		
 		// Virtual pages
 		if($includeVirtuals) {
@@ -1786,38 +1829,28 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 				foreach($virtuals as $item) {
 					$item->DependentLinkType = 'Virtual page';
 					$virtualList->push($item);
-			}
+				}
 				$items->merge($virtualList);
-		}
+			}
 		}
 
 		// Redirector pages
-		$redirectors = DataObject::get("RedirectorPage", "\"RedirectorPage\".\"RedirectionType\" = 'Internal' AND \"LinkToID\" = $this->ID");
+		$redirectors = RedirectorPage::get()->where(array(
+			'"RedirectorPage"."RedirectionType"' => 'Internal',
+			'"RedirectorPage"."LinkToID"' => $this->ID
+		));
 		if($redirectors) {
 			$redirectorList = new ArrayList();
 			foreach($redirectors as $item) {
 				$item->DependentLinkType = 'Redirector page';
 				$redirectorList->push($item);
-		}
+			}
 			$items->merge($redirectorList);
 		}
 
 		if(class_exists('Subsite')) Subsite::disable_subsite_filter($origDisableSubsiteFilter);
 		
 		return $items;
-	}
-	
-	/**
-	 * Return the number of {@link DependentPages()}
-	 * 
-	 * @deprecated 3.1 Use DependentPages()->Count() instead.
-	 *
-	 * @param bool $includeVirtuals Set to false to exlcude virtual pages.
-	 * @return ArrayList
-	 */
-	public function DependentPagesCount($includeVirtuals = true) {
-		Deprecation::notice('3.1', 'Use SiteTree->DependentPages()->Count() instead.');
-		return $this->DependentPages($includeVirtuals)->Count();
 	}
 
 	/**
@@ -1826,14 +1859,26 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * @return DataList
 	 */
 	public function VirtualPages() {
+		
+		// Ignore new records
 		if(!$this->ID) return null;
+		
+		// Check subsite virtual pages
+		// @todo Refactor out subsite module specific code
 		if(class_exists('Subsite')) {
-			return Subsite::get_from_all_subsites('VirtualPage', "\"CopyContentFromID\" = " . (int)$this->ID);
-		} elseif(class_exists('VirtualPage')) {
-			return DataObject::get('VirtualPage', "\"CopyContentFromID\" = " . (int)$this->ID);
-		}else{
-			return null;
+			return Subsite::get_from_all_subsites('VirtualPage', array(
+				'"VirtualPage"."CopyContentFromID"' => $this->ID
+			));
 		}
+		
+		// Check existing virtualpages
+		if(class_exists('VirtualPage')) {
+			return VirtualPage::get()->where(array(
+				'"VirtualPage"."CopyContentFromID"' => $this->ID
+			));
+		}
+		
+		return null;
 	}
 
 	/**
@@ -1935,8 +1980,12 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			(self::config()->nested_urls && $this->ParentID ? $this->Parent()->RelativeLink(true) : null)
 		);
 		
-		$urlsegment = new SiteTreeURLSegmentField("URLSegment", $this->fieldLabel('URLSegment'));
-		$urlsegment->setURLPrefix($baseLink);
+		$urlsegment = SiteTreeURLSegmentField::create("URLSegment", $this->fieldLabel('URLSegment'))
+			->setURLPrefix($baseLink)
+			->setDefaultURL($this->generateURLSegment(_t(
+				'CMSMain.NEWPAGE',
+				array('pagetype' => $this->i18n_singular_name())
+			)));
 		$helpText = (self::config()->nested_urls && count($this->Children())) ? $this->fieldLabel('LinkChangeNote') : '';
 		if(!Config::inst()->get('URLSegmentFilter', 'default_allow_multibyte')) {
 			$helpText .= $helpText ? '<br />' : '';
@@ -2079,8 +2128,8 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 						->setAttribute(
 							'data-placeholder', 
 							_t('SiteTree.GroupPlaceholder', 'Click to select group')
+						)
 				)
-			)
 			)
 		);
 		
@@ -2211,7 +2260,9 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		$rootTabSet->addExtraClass('ss-ui-action-tabset action-menus');
 
 		// Render page information into the "more-options" drop-up, on the top.
-		$live = Versioned::get_one_by_stage('SiteTree', 'Live', "\"SiteTree\".\"ID\"='$this->ID'");
+		$live = Versioned::get_one_by_stage('SiteTree', 'Live', array(
+			'"SiteTree"."ID"' => $this->ID
+		));
 		$moreOptions->push(
 			new LiteralField('Information',
 				$this->customise(array(
@@ -2222,7 +2273,9 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		);
 
 		// "readonly"/viewing version that isn't the current version of the record
-		$stageOrLiveRecord = Versioned::get_one_by_stage($this->class, Versioned::current_stage(), sprintf('"SiteTree"."ID" = %d', $this->ID));
+		$stageOrLiveRecord = Versioned::get_one_by_stage($this->class, Versioned::current_stage(), array(
+			'"SiteTree"."ID"' => $this->ID
+		));
 		if($stageOrLiveRecord && $stageOrLiveRecord->Version != $this->Version) {
 			$moreOptions->push(FormAction::create('email', _t('CMSMain.EMAIL', 'Email')));
 			$moreOptions->push(FormAction::create('rollback', _t('CMSMain.ROLLBACK', 'Roll back to this version')));
@@ -2235,7 +2288,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			return $actions;
 		}
 
-		if($this->isPublished() && $this->canPublish() && !$this->IsDeletedFromStage && $this->canDeleteFromLive()) {
+		if($this->isPublished() && $this->canPublish() && !$this->getIsDeletedFromStage() && $this->canDeleteFromLive()) {
 			// "unpublish"
 			$moreOptions->push(
 				FormAction::create('unpublish', _t('SiteTree.BUTTONUNPUBLISH', 'Unpublish'), 'delete')
@@ -2244,7 +2297,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			);
 		}
 
-		if($this->stagesDiffer('Stage', 'Live') && !$this->IsDeletedFromStage) {
+		if($this->stagesDiffer('Stage', 'Live') && !$this->getIsDeletedFromStage()) {
 			if($this->isPublished() && $this->canEdit())	{
 				// "rollback"
 				$moreOptions->push(
@@ -2255,7 +2308,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		}
 
 		if($this->canEdit()) {
-			if($this->IsDeletedFromStage) {
+			if($this->getIsDeletedFromStage()) {
 				// The usual major actions are not available, so we provide alternatives here.
 				if($existsOnLive) {
 					// "restore"
@@ -2263,20 +2316,50 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 					if($this->canDelete() && $this->canDeleteFromLive()) {
 						// "delete from live"
 						$majorActions->push(
-							FormAction::create('deletefromlive',_t('CMSMain.DELETEFP','Delete'))->addExtraClass('ss-ui-action-destructive')
+							FormAction::create('deletefromlive',_t('CMSMain.DELETEFP','Delete'))
+								->addExtraClass('ss-ui-action-destructive')
 						);
 					}
 				} else {
+					// Determine if we should force a restore to root (where once it was a subpage)
+					$restoreToRoot = $this->isParentArchived();
+					
 					// "restore"
+					$title = $restoreToRoot
+						? _t('CMSMain.RESTORE_TO_ROOT','Restore draft at top level')
+						: _t('CMSMain.RESTORE','Restore draft');
+					$description = $restoreToRoot
+						? _t('CMSMain.RESTORE_TO_ROOT_DESC','Restore the archived version to draft as a top level page')
+						: _t('CMSMain.RESTORE_DESC', 'Restore the archived version to draft');
 					$majorActions->push(
-						FormAction::create('restore',_t('CMSMain.RESTORE','Restore'))->setAttribute('data-icon', 'decline')
+						FormAction::create('restore', $title)
+							->setDescription($description)
+							->setAttribute('data-to-root', $restoreToRoot)
+							->setAttribute('data-icon', 'decline')
 					);
 				}
 			} else {
-				if($this->canDelete()) {
-					// "delete"
+				// Detect use of legacy actions
+				// {@see CMSMain::enabled_legacy_actions}
+				$legacy = CMSMain::config()->enabled_legacy_actions;
+				if(in_array('CMSBatchAction_Delete', $legacy)) {
+					Deprecation::notice('4.0', 'Delete from Stage is deprecated. Use Archive instead.');
+					if($this->canDelete()) {
+						// delete
+						$moreOptions->push(
+							FormAction::create('delete',_t('CMSMain.DELETE','Delete draft'))
+								->addExtraClass('delete ss-ui-action-destructive')
+						);
+					}
+				} elseif($this->canArchive()) {
+					// "archive"
 					$moreOptions->push(
-						FormAction::create('delete',_t('CMSMain.DELETE','Delete draft'))->addExtraClass('delete ss-ui-action-destructive')
+						FormAction::create('archive',_t('CMSMain.ARCHIVE','Archive'))
+							->setDescription(_t(
+								'SiteTree.BUTTONARCHIVEDESC',
+								'Unpublish and send to archive'
+							))
+							->addExtraClass('delete ss-ui-action-destructive')
 					);
 				}
 			
@@ -2290,7 +2373,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			}
 		}
 
-		if($this->canPublish() && !$this->IsDeletedFromStage) {
+		if($this->canPublish() && !$this->getIsDeletedFromStage()) {
 			// "publish", as with "save", it supports an alternate state to show when action is needed.
 			$majorActions->push(
 				$publish = FormAction::create('publish', _t('SiteTree.BUTTONPUBLISHED', 'Published'))
@@ -2302,7 +2385,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 			// Set up the initial state of the button to reflect the state of the underlying SiteTree object.
 			if($this->stagesDiffer('Stage', 'Live')) {
 				$publish->addExtraClass('ss-ui-alternate');
-		}
+			}
 		}
 		
 		$actions = new FieldList(array($majorActions, $rootTabSet));
@@ -2318,11 +2401,14 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * 
 	 * @uses SiteTreeExtension->onBeforePublish()
 	 * @uses SiteTreeExtension->onAfterPublish()
+	 * @return bool True if published
 	 */
 	public function doPublish() {
 		if (!$this->canPublish()) return false;
 		
-		$original = Versioned::get_one_by_stage("SiteTree", "Live", "\"SiteTree\".\"ID\" = $this->ID");
+		$original = Versioned::get_one_by_stage("SiteTree", "Live", array(
+			'"SiteTree"."ID"' => $this->ID
+		));
 		if(!$original) $original = new SiteTree();
 
 		// Handle activities undertaken by extensions
@@ -2331,16 +2417,18 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		$this->write();
 		$this->publish("Stage", "Live");
 
-		DB::query("UPDATE \"SiteTree_Live\"
-			SET \"Sort\" = (SELECT \"SiteTree\".\"Sort\" FROM \"SiteTree\" WHERE \"SiteTree_Live\".\"ID\" = \"SiteTree\".\"ID\")
-			WHERE EXISTS (SELECT \"SiteTree\".\"Sort\" FROM \"SiteTree\" WHERE \"SiteTree_Live\".\"ID\" = \"SiteTree\".\"ID\") AND \"ParentID\" = " . sprintf('%d', $this->ParentID) );
+		DB::prepared_query('UPDATE "SiteTree_Live"
+			SET "Sort" = (SELECT "SiteTree"."Sort" FROM "SiteTree" WHERE "SiteTree_Live"."ID" = "SiteTree"."ID")
+			WHERE EXISTS (SELECT "SiteTree"."Sort" FROM "SiteTree" WHERE "SiteTree_Live"."ID" = "SiteTree"."ID") AND "ParentID" = ?',
+			array($this->ParentID)
+		);
 			
 		// Publish any virtual pages that might need publishing
 		$linkedPages = $this->VirtualPages();
 		if($linkedPages) foreach($linkedPages as $page) {
 			$page->copyFrom($page->CopyContentFrom());
 			$page->write();
-			if($page->ExistsOnLive) $page->doPublish();
+			if($page->getExistsOnLive()) $page->doPublish();
 		}
 		
 		// Need to update pages linking to this one as no longer broken, on the live site
@@ -2393,7 +2481,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 
 		// If we're on the draft site, then we can update the status.
 		// Otherwise, these lines will resurrect an inappropriate record
-		if(DB::query("SELECT \"ID\" FROM \"SiteTree\" WHERE \"ID\" = $this->ID")->value()
+		if(DB::prepared_query("SELECT \"ID\" FROM \"SiteTree\" WHERE \"ID\" = ?", array($this->ID))->value()
 			&& Versioned::current_stage() != 'Live') {
 			$this->write();
 		}
@@ -2422,6 +2510,22 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		}
 		
 		$this->invokeWithExtensions('onAfterRevertToLive', $this);
+		return true;
+	}
+
+	/**
+	 * Determine if this page references a parent which is archived, and not available in stage
+	 *
+	 * @return bool True if there is an archived parent
+	 */
+	protected function isParentArchived() {
+		if($parentID = $this->ParentID) {
+			$parentPage = Versioned::get_latest_version("SiteTree", $parentID);
+			if(!$parentPage || $parentPage->IsDeletedFromStage) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -2430,12 +2534,17 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	 * @return self
 	 */
 	public function doRestoreToStage() {
+		// Ensure that the parent page is restored, otherwise restore to root
+		if($this->isParentArchived()) {
+			$this->ParentID = 0;
+		}
+		
 		// if no record can be found on draft stage (meaning it has been "deleted from draft" before),
 		// create an empty record
-		if(!DB::query("SELECT \"ID\" FROM \"SiteTree\" WHERE \"ID\" = $this->ID")->value()) {
-			$conn = DB::getConn();
+		if(!DB::prepared_query("SELECT \"ID\" FROM \"SiteTree\" WHERE \"ID\" = ?", array($this->ID))->value()) {
+			$conn = DB::get_conn();
 			if(method_exists($conn, 'allowPrimaryKeyEditing')) $conn->allowPrimaryKeyEditing('SiteTree', true);
-			DB::query("INSERT INTO \"SiteTree\" (\"ID\") VALUES ($this->ID)");
+			DB::prepared_query("INSERT INTO \"SiteTree\" (\"ID\") VALUES (?)", array($this->ID));
 			if(method_exists($conn, 'allowPrimaryKeyEditing')) $conn->allowPrimaryKeyEditing('SiteTree', false);
 		}
 		
@@ -2455,6 +2564,50 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		Versioned::reading_stage($oldStage);
 		
 		return $result;
+	}
+
+	/**
+	 * Removes the page from both live and stage
+	 *
+	 * @return bool Success
+	 */
+	public function doArchive() {
+		if($this->doUnpublish()) {
+			$this->delete();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Check if the current user is allowed to archive this page.
+	 * If extended, ensure that both canDelete and canDeleteFromLive are extended also
+	 *
+	 * @param Member $member
+	 * @return bool
+	 */
+	public function canArchive($member = null) {
+		if(!$member) {
+            $member = Member::currentUser();
+        }
+		
+		// Standard mechanism for accepting permission changes from extensions
+		$extended = $this->extendedCan('canArchive', $member);
+		if($extended !== null) {
+            return $extended;
+        }
+
+		// Check if this page can be deleted
+        if(!$this->canDelete($member)) {
+            return false;
+        }
+        
+        // If published, check if we can delete from live
+        if($this->ExistsOnLive && !$this->canDeleteFromLive($member)) {
+            return false;
+        }
+        
+		return true;
 	}
 
 	/**
@@ -2491,7 +2644,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 		if($this->isNew())
 			return false;
 
-		return (DB::query("SELECT \"ID\" FROM \"SiteTree_Live\" WHERE \"ID\" = $this->ID")->value())
+		return (DB::prepared_query("SELECT \"ID\" FROM \"SiteTree_Live\" WHERE \"ID\" = ?", array($this->ID))->value())
 			? true
 			: false;
 	}
@@ -2643,24 +2796,24 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	public function getStatusFlags($cached = true) {
 		if(!$this->_cache_statusFlags || !$cached) {
 			$flags = array();
-			if($this->IsDeletedFromStage) {
-				if($this->ExistsOnLive) {
+			if($this->getIsDeletedFromStage()) {
+				if($this->getExistsOnLive()) {
 					$flags['removedfromdraft'] = array(
 						'text' => _t('SiteTree.REMOVEDFROMDRAFTSHORT', 'Removed from draft'),
 						'title' => _t('SiteTree.REMOVEDFROMDRAFTHELP', 'Page is published, but has been deleted from draft'),
 					);
 				} else {
-					$flags['deletedonlive'] = array(
-						'text' => _t('SiteTree.DELETEDPAGESHORT', 'Deleted'),
-						'title' => _t('SiteTree.DELETEDPAGEHELP', 'Page is no longer published'),
+					$flags['archived'] = array(
+						'text' => _t('SiteTree.ARCHIVEDPAGESHORT', 'Archived'),
+						'title' => _t('SiteTree.ARCHIVEDPAGEHELP', 'Page is removed from draft and live'),
 					);
 				}
-			} else if($this->IsAddedToStage) {
+			} else if($this->getIsAddedToStage()) {
 				$flags['addedtodraft'] = array(
 					'text' => _t('SiteTree.ADDEDTODRAFTSHORT', 'Draft'),
 					'title' => _t('SiteTree.ADDEDTODRAFTHELP', "Page has not been published yet")
 				);
-			} else if($this->IsModifiedOnStage) {
+			} else if($this->getIsModifiedOnStage()) {
 				$flags['modified'] = array(
 					'text' => _t('SiteTree.MODIFIEDONDRAFTSHORT', 'Modified'),
 					'title' => _t('SiteTree.MODIFIEDONDRAFTHELP', 'Page has unpublished changes'),
@@ -2730,6 +2883,18 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 	}
 
 	/**
+	 * Gets the depth of this page in the sitetree, where 1 is the root level
+	 *
+	 * @return int
+	 */
+	public function getPageLevel() {
+		if($this->ParentID) {
+			return 1 + $this->Parent()->getPageLevel();
+		}
+		return 1;
+	}
+
+	/**
 	 * Return the CSS classes to apply to this node in the CMS tree.
 	 *
 	 * @param string $numChildrenMethod
@@ -2747,7 +2912,7 @@ class SiteTree extends DataObject implements PermissionProvider,i18nEntityProvid
 
 		if(!$this->canEdit() && !$this->canAddChildren()) {
 			if (!$this->canView()) {
-			$classes .= " disabled";
+				$classes .= " disabled";
 			} else {
 				$classes .= " edit-disabled";
 			}

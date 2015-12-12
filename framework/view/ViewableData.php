@@ -209,6 +209,13 @@ class ViewableData extends Object implements IteratorAggregate {
 	}
 	
 	/**
+	 * @return ViewableData
+	 */
+	public function getCustomisedObj() {
+		return $this->customisedObject;
+	}
+
+	/**
 	 * @param ViewableData $object
 	 */
 	public function setCustomisedObj(ViewableData $object) {
@@ -338,6 +345,38 @@ class ViewableData extends Object implements IteratorAggregate {
 			"ViewableData::renderWith(): unexpected $template->class object, expected an SSViewer instance"
 		);
 	}
+
+	/**
+	 * Generate the cache name for a field
+	 *
+	 * @param string $fieldName Name of field
+	 * @param array $arguments List of optional arguments given
+	 */
+	protected function objCacheName($fieldName, $arguments) {
+		return $arguments
+			? $fieldName . ":" . implode(',', $arguments)
+			: $fieldName;
+	}
+
+	/**
+	 * Get a cached value from the field cache
+	 *
+	 * @param string $key Cache key
+	 * @return mixed
+	 */
+	protected function objCacheGet($key) {
+		if(isset($this->objCache[$key])) return $this->objCache[$key];
+	}
+
+	/**
+	 * Store a value in the field cache
+	 *
+	 * @param string $key Cache key
+	 * @param mixed $value
+	 */
+	protected function objCacheSet($key, $value) {
+		$this->objCache[$key] = $value;
+	}
 	
 	/**
 	 * Get the value of a field on this object, automatically inserting the value into any available casting objects
@@ -347,12 +386,14 @@ class ViewableData extends Object implements IteratorAggregate {
 	 * @param array $arguments
 	 * @param bool $forceReturnedObject if TRUE, the value will ALWAYS be casted to an object before being returned,
 	 *        even if there is no explicit casting information
+	 * @param bool $cache Cache this object
 	 * @param string $cacheName a custom cache name
 	 */
 	public function obj($fieldName, $arguments = null, $forceReturnedObject = true, $cache = false, $cacheName = null) {
-		if(!$cacheName) $cacheName = $arguments ? $fieldName . implode(',', $arguments) : $fieldName;
-		
-		if(!isset($this->objCache[$cacheName])) {
+		if(!$cacheName && $cache) $cacheName = $this->objCacheName($fieldName, $arguments);
+
+		$value = $cache ? $this->objCacheGet($cacheName) : null;
+		if(!isset($value)) {
 			// HACK: Don't call the deprecated FormField::Name() method
 			$methodIsAllowed = true;
 			if($this instanceof FormField && $fieldName == 'Name') $methodIsAllowed = false;
@@ -374,9 +415,7 @@ class ViewableData extends Object implements IteratorAggregate {
 				$value = $valueObject;
 			}
 			
-			if($cache) $this->objCache[$cacheName] = $value;
-		} else {
-			$value = $this->objCache[$cacheName];
+			if($cache) $this->objCacheSet($cacheName, $value);
 		}
 		
 		if(!is_object($value) && $forceReturnedObject) {
@@ -661,7 +700,14 @@ class ViewableData_Debugger extends ViewableData {
 		$this->object = $object;
 		parent::__construct();
 	}
-	
+
+	/**
+	 * @return string The rendered debugger
+	 */
+	public function __toString() {
+		return $this->forTemplate();
+	}
+
 	/**
 	 * Return debugging information, as XHTML. If a field name is passed, it will show debugging information on that
 	 * field, otherwise it will show information on all methods and fields.

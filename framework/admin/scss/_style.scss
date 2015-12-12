@@ -134,6 +134,10 @@ body.cms {
 			margin-right: 4px;
 			background-repeat: no-repeat;
 		}
+
+		.cms_backlink {
+			vertical-align: middle;
+		}
 	}
 	
 	// Reset to default styles
@@ -416,8 +420,9 @@ body.cms {
 	.loading-animation {
 		display: none;
 		position: absolute;
-		left: 49%;
-		top: 75%;
+		left: 50%;
+		margin-left: -21.5px; // Half of spinner size
+		top: 80%;
 	}
 }
 
@@ -712,7 +717,7 @@ body.cms {
  */
 .cms-content-tools {
 	background: $tab-panel-texture-color;
-	width: $grid-x * 25;
+	width: $grid-x * 36;
 	overflow-y: auto;	
 	overflow-x: hidden;
 	z-index: 70;
@@ -735,7 +740,7 @@ body.cms {
 	}
 	
 	.cms-panel-content {
-		width: ($grid-x * 23);
+		width: $grid-x * 34;
 		padding: $grid-x*1.1 $grid-x 0; // smaller left/right padding to use space efficiently
 		overflow: auto;
 		height:100%;
@@ -1177,7 +1182,7 @@ form.member-profile-form {
 			span {
 				display: inline-block;
 				margin: 0 5px;
-				color: $color-text-dark;
+				color: #555d60;
 				font-size: 16px;
 			}
 			
@@ -1312,10 +1317,12 @@ form.member-profile-form {
 // most styles should be applied to .cms-dialog instead (which declares the content in the frame)
 .ui-dialog {
 	background: url("../images/textures/bg_cms_main_content.png") repeat left top #F0F3F4;
-	border: 3px solid #000 !important;
-	border-radius: $grid-y;
+	background-clip: content-box;
+	border: 1px solid #666 !important;
+	@include border-radius($grid-y);
 	overflow: visible;
 	padding: 0;
+	@include box-shadow(0px 0px 30px 10px rgba(0,0,0,.3));
  
   	// Titlebar for pop-up dialog.
 	.ui-dialog-titlebar.ui-widget-header {
@@ -1334,6 +1341,7 @@ form.member-profile-form {
 	}
 
 	.ui-dialog-content {
+		@include border-radius($grid-y);
 		overflow: auto; // TODO Replace with proper $.layout grid
 
 		&.loading {
@@ -1472,7 +1480,7 @@ body.cms-dialog {
 		width:100%;
 		height: 40px;
 		h3{
-			padding: 0 8px;
+			padding: 3px 8px;
 			margin: 10px;
 		}
 	}
@@ -1519,6 +1527,11 @@ body.cms-dialog {
 	.step2 {
 		margin-bottom: $grid-x*2;
 	}
+	.ss-uploadfield {
+		.middleColumn {
+			width: auto;
+		}
+	}
 }
 
 .htmleditorfield-mediaform {
@@ -1526,18 +1539,6 @@ body.cms-dialog {
 		.gridfield-button-delete {
 			// TODO Remove from PHP instead of hiding
 			display: none; // delete action shouldn't be allowed here
-		}
-		table.ss-gridfield-table {
-			tbody td:first-child {
-				padding: 0;
-				text-align: center;
-				img {
-					max-height: 30px; // same thumbnail size as uploadfield rows
-				}
-			}
-			tr td {
-				padding: $grid-x/2; // more compressed space
-			}	
 		}
 	}
 
@@ -1657,6 +1658,7 @@ body.cms-dialog {
 	}
 	.cms-file-info-data {
 		float: left;
+		width: 55%;
 
 		.field {
 			// Unsetting styles from .field, make it more compact visually

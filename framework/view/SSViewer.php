@@ -206,6 +206,7 @@ class SSViewer_BasicIteratorSupport implements TemplateIteratorProvider {
 			'Odd',
 			'EvenOdd',
 			'Pos',
+			'FromEnd',
 			'TotalItems',
 			'Modulus',
 			'MultipleOf',
@@ -310,6 +311,17 @@ class SSViewer_BasicIteratorSupport implements TemplateIteratorProvider {
 	 */
 	public function Pos($startIndex = 1) {
 		return $this->iteratorPos + $startIndex;
+	}
+
+	/**
+	 * Return the position of this item from the last item in the list. The position of the final
+	 * item is $endIndex, which defaults to 1.
+	 *
+	 * @param integer $endIndex Value of the last item
+	 * @return int
+	 */
+	public function FromEnd($endIndex = 1) {
+		return $this->iteratorTotalItems - $this->iteratorPos + $endIndex - 1;
 	}
 
 	/**
@@ -587,20 +599,20 @@ class SSViewer implements Flushable {
 	 * Set whether HTML comments indicating the source .SS file used to render this page should be
 	 * included in the output.  This is enabled by default
 	 *
-	 * @deprecated 3.2 Use the "SSViewer.source_file_comments" config setting instead
+	 * @deprecated 4.0 Use the "SSViewer.source_file_comments" config setting instead
 	 * @param boolean $val
 	 */
 	public static function set_source_file_comments($val) {
-		Deprecation::notice('3.2', 'Use the "SSViewer.source_file_comments" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SSViewer.source_file_comments" config setting instead');
 		Config::inst()->update('SSViewer', 'source_file_comments', $val);
 	}
 	
 	/**
-	 * @deprecated 3.2 Use the "SSViewer.source_file_comments" config setting instead
+	 * @deprecated 4.0 Use the "SSViewer.source_file_comments" config setting instead
 	 * @return boolean
 	 */
 	public static function get_source_file_comments() {
-		Deprecation::notice('3.2', 'Use the "SSViewer.source_file_comments" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SSViewer.source_file_comments" config setting instead');
 		return Config::inst()->get('SSViewer', 'source_file_comments');
 	}
 	
@@ -660,28 +672,34 @@ class SSViewer implements Flushable {
 
 	/**
 	 * Create a template from a string instead of a .ss file
-	 * 
+	 *
+	 * @param string $content The template content
+	 * @param bool|void $cacheTemplate Whether or not to cache the template from string
 	 * @return SSViewer
 	 */
-	public static function fromString($content) {
-		return new SSViewer_FromString($content);
+	public static function fromString($content, $cacheTemplate = null) {
+		$viewer = new SSViewer_FromString($content);
+		if ($cacheTemplate !== null) {
+			$viewer->setCacheTemplate($cacheTemplate);
+		}
+		return $viewer;
 	}
 	
 	/**
-	 * @deprecated 3.2 Use the "SSViewer.theme" config setting instead
+	 * @deprecated 4.0 Use the "SSViewer.theme" config setting instead
 	 * @param string $theme The "base theme" name (without underscores). 
 	 */
 	public static function set_theme($theme) {
-		Deprecation::notice('3.2', 'Use the "SSViewer.theme" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SSViewer.theme" config setting instead');
 		Config::inst()->update('SSViewer', 'theme', $theme);
 	}
 	
 	/**
-	 * @deprecated 3.2 Use the "SSViewer.theme" config setting instead
+	 * @deprecated 4.0 Use the "SSViewer.theme" config setting instead
 	 * @return string 
 	 */
 	public static function current_theme() {
-		Deprecation::notice('3.2', 'Use the "SSViewer.theme" config setting instead');
+		Deprecation::notice('4.0', 'Use the "SSViewer.theme" config setting instead');
 		return Config::inst()->get('SSViewer', 'theme');
 	}
 	
@@ -720,10 +738,11 @@ class SSViewer implements Flushable {
 	}
 
 	/**
+	 * @deprecated since version 4.0
 	 * @return string
 	 */
 	public static function current_custom_theme(){
-		Deprecation::notice('3.2', 'Use the "SSViewer.theme" and "SSViewer.theme_enabled" config settings instead');
+		Deprecation::notice('4.0', 'Use the "SSViewer.theme" and "SSViewer.theme_enabled" config settings instead');
 		return Config::inst()->get('SSViewer', 'theme_enabled') ? Config::inst()->get('SSViewer', 'theme') : null;
 	}
 
@@ -748,6 +767,13 @@ class SSViewer implements Flushable {
 		foreach($classes as $class) {
 			$template = $class . $suffix;
 			if(SSViewer::hasTemplate($template)) $templates[] = $template;
+
+			// If the class is "Page_Controller", look for Page.ss
+			if(stripos($class,'_controller') !== false) {
+				$template = str_ireplace('_controller','',$class) . $suffix;
+				if(SSViewer::hasTemplate($template)) $templates[] = $template;
+			}
+
 			if($baseClass && $class == $baseClass) break;
 		}
 		return $templates;
@@ -842,31 +868,31 @@ class SSViewer implements Flushable {
 	 *    links: "<?php echo $_SERVER['REQUEST_URI']; ?>".  This is useful if you're generating a 
 	 *    page that will be saved to a .php file and may be accessed from different URLs.
 	 *
-	 * @deprecated 3.2 Use the "SSViewer.rewrite_hash_links" config setting instead
+	 * @deprecated 4.0 Use the "SSViewer.rewrite_hash_links" config setting instead
 	 * @param string $optionName
 	 * @param mixed $optionVal
 	 */
 	public static function setOption($optionName, $optionVal) {
 		if($optionName == 'rewriteHashlinks') {
-			Deprecation::notice('3.2', 'Use the "SSViewer.rewrite_hash_links" config setting instead');
+			Deprecation::notice('4.0', 'Use the "SSViewer.rewrite_hash_links" config setting instead');
 			Config::inst()->update('SSViewer', 'rewrite_hash_links', $optionVal);
 		} else {
-			Deprecation::notice('3.2', 'Use the "SSViewer.' . $optionName . '" config setting instead');
+			Deprecation::notice('4.0', 'Use the "SSViewer.' . $optionName . '" config setting instead');
 			Config::inst()->update('SSViewer', $optionName, $optionVal);
 		}
 	}
 	
 	/**
- 	 * @deprecated 3.2 Use the "SSViewer.rewrite_hash_links" config setting instead
+ 	 * @deprecated 4.0 Use the "SSViewer.rewrite_hash_links" config setting instead
  	 * @param string
  	 * @return mixed
 	 */
 	public static function getOption($optionName) {
 		if($optionName == 'rewriteHashlinks') {
-			Deprecation::notice('3.2', 'Use the "SSViewer.rewrite_hash_links" config setting instead');
+			Deprecation::notice('4.0', 'Use the "SSViewer.rewrite_hash_links" config setting instead');
 			return Config::inst()->get('SSViewer', 'rewrite_hash_links');
 		} else {
-			Deprecation::notice('3.2', 'Use the "SSViewer.' . $optionName . '" config setting instead');
+			Deprecation::notice('4.0', 'Use the "SSViewer.' . $optionName . '" config setting instead');
 			return Config::inst()->get('SSViewer', $optionName);
 		}
 	}
@@ -1055,13 +1081,6 @@ class SSViewer implements Flushable {
 	public function process($item, $arguments = null, $inheritedScope = null) {
 		SSViewer::$topLevel[] = $item;
 
-		if ($arguments && $arguments instanceof Zend_Cache_Core) {
-			Deprecation::notice('3.0', 'Use setPartialCacheStore to override the partial cache storage backend, ' .
-				'the second argument to process is now an array of variables.');
-			$this->setPartialCacheStore($arguments);
-			$arguments = null;
-		}
-
 		if(isset($this->chosenTemplates['main'])) {
 			$template = $this->chosenTemplates['main'];
 		} else {
@@ -1110,10 +1129,10 @@ class SSViewer implements Flushable {
 		$rewrite = Config::inst()->get('SSViewer', 'rewrite_hash_links');
 		if($this->rewriteHashlinks && $rewrite) {
 			if(strpos($output, '<base') !== false) {
-				if($rewrite === 'php') { 
-					$thisURLRelativeToBase = "<?php echo Convert::raw2att(\$_SERVER['REQUEST_URI']); ?>";
+				if($rewrite === 'php') {
+					$thisURLRelativeToBase = "<?php echo Convert::raw2att(preg_replace(\"/^(\\\\/)+/\", \"/\", \$_SERVER['REQUEST_URI'])); ?>";
 				} else { 
-					$thisURLRelativeToBase = Convert::raw2att($_SERVER['REQUEST_URI']);
+					$thisURLRelativeToBase = Convert::raw2att(preg_replace("/^(\\/)+/", "/", $_SERVER['REQUEST_URI']));
 				}
 
 				$output = preg_replace('/(<a[^>]+href *= *)"#/i', '\\1"' . $thisURLRelativeToBase . '#', $output);
@@ -1205,31 +1224,68 @@ class SSViewer implements Flushable {
  * @subpackage view
  */
 class SSViewer_FromString extends SSViewer {
+
+	/**
+	 * The global template caching behaviour if no instance override is specified
+	 * @config
+	 * @var bool
+	 */
+	private static $cache_template = true;
+	
+	/**
+	 * The template to use
+	 * @var string
+	 */
 	protected $content;
+	
+	/**
+	 * Indicates whether templates should be cached
+	 * @var bool
+	 */
+	protected $cacheTemplate;
 	
 	public function __construct($content, TemplateParser $parser = null) {
 		$this->setParser($parser ?: Injector::inst()->get('SSTemplateParser'));
 		$this->content = $content;
 	}
-	
+
 	public function process($item, $arguments = null, $scope = null) {
-		if ($arguments && $arguments instanceof Zend_Cache_Core) {
-			Deprecation::notice('3.0', 'Use setPartialCacheStore to override the partial cache storage backend, ' .
-				'the second argument to process is now an array of variables.');
-			$this->setPartialCacheStore($arguments);
-			$arguments = null;
+		$hash = sha1($this->content);
+		$cacheFile = TEMP_FOLDER . "/.cache.$hash";
+
+		if(!file_exists($cacheFile) || isset($_GET['flush'])) {
+			$content = $this->parseTemplateContent($this->content, "string sha1=$hash");
+			$fh = fopen($cacheFile,'w');
+			fwrite($fh, $content);
+			fclose($fh);
 		}
 
-		$template = $this->parseTemplateContent($this->content, "string sha1=".sha1($this->content));
+		$val = $this->includeGeneratedTemplate($cacheFile, $item, $arguments, null, $scope);
 
-		$tmpFile = tempnam(TEMP_FOLDER,"");
-		$fh = fopen($tmpFile, 'w');
-		fwrite($fh, $template);
-		fclose($fh);
+		if ($this->cacheTemplate !== null) {
+			$cacheTemplate = $this->cacheTemplate;
+		} else {
+			$cacheTemplate = Config::inst()->get('SSViewer_FromString', 'cache_template');
+		}
+		
+		if (!$cacheTemplate) {
+			unlink($cacheFile);
+		}
 
-		$val = $this->includeGeneratedTemplate($tmpFile, $item, $arguments, null, $scope);
-
-		unlink($tmpFile);
 		return $val;
+	}
+	
+	/**
+	 * @param boolean $cacheTemplate
+	 */
+	public function setCacheTemplate($cacheTemplate) {
+		$this->cacheTemplate = (bool) $cacheTemplate;
+	}
+	
+	/**
+	 * @return boolean
+	 */
+	public function getCacheTemplate() {
+		return $this->cacheTemplate;
 	}
 }

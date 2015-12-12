@@ -10,11 +10,11 @@
  */
 function getTempFolder($base = null) {
 	$parent = getTempParentFolder($base);
-	
+
 	// The actual temp folder is a subfolder of getTempParentFolder(), named by username
 	$subfolder = $parent . DIRECTORY_SEPARATOR . getTempFolderUsername();
 
-	if(!@file_exists($subfolder)) {	
+	if(!@file_exists($subfolder)) {
 		mkdir($subfolder);
 	}
 
@@ -51,7 +51,6 @@ function getTempFolderUsername() {
 function getTempParentFolder($base = null) {
 	if(!$base && defined('BASE_PATH')) $base = BASE_PATH;
 
-	$tempPath = '';
 	$worked = true;
 
 	// first, try finding a silverstripe-cache dir built off the base path

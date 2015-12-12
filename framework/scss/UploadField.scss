@@ -18,7 +18,7 @@
 		// TODO .middleColumn styling should probably be theme specific (eg cms ui will look different than blackcandy)
 		// so we should move this style into the cms and black candy files
 		min-width: 510px;
-		max-width: 600px; // Capped width. 600px is about the average size of a preview split view
+		max-width: $grid-x * 87; // Capped width to line up with text fields
 		width:100%;
 		margin-left:0;
 		clear:both;
@@ -296,4 +296,36 @@
 		height: 94px; // Approxmiately matches the height of the field once a file is attached, avoids a 'jump' in size
 		background: transparent url(../admin/images/spinner.gif) no-repeat 50% 50%;
 	}
+}
+
+/** ----------------------------------------------------
+ * "@2x" media query
+ * ---------------------------------------------------- */
+
+@media
+	only screen and (-webkit-min-device-pixel-ratio: 2),
+	only screen and (   min--moz-device-pixel-ratio: 2),
+	only screen and (     -o-min-device-pixel-ratio: 2/1),
+	only screen and (        min-device-pixel-ratio: 2),
+	only screen and (                min-resolution: 192dpi),
+	only screen and (                min-resolution: 2dppx) {
+
+	.ss-uploadfield {
+		.ss-uploadfield-files {
+			.ss-uploadfield-item-editform {
+				&.loading {
+					background-image: url(../admin/images/spinner@2x.gif);
+					background-size: 43px 43px;
+				}
+			}
+		}
+	}
+
+	.ss-upload {
+		.loader {
+			background-image: url(../admin/images/spinner@2x.gif);
+			background-size: 43px 43px;
+		}
+	}
+
 }
