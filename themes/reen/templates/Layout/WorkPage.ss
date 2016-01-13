@@ -123,13 +123,12 @@
 				<div class="container">
 					<div class="row">
 						<div class="col-md-8 col-sm-9 inner center-block text-center">
-							<% if $ActionBoxTitle %>
-								<header>
+							<header>
+								<% if $ActionBoxTitle %>
 									<h1>$ActionBoxTitle</h1>
-								</header>
-							<% end_if %>
-
-							$ActionBoxContent
+								<% end_if %>
+								$ActionBoxContent
+							</header>
 
 							<% if $ActionBoxRedirectPage %>
 								<a href="$ActionBoxRedirectPage.Link" class="btn btn-large btn-bordered">$ActionBoxRedirectButtonText</a>
