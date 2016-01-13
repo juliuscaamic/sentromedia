@@ -21,7 +21,7 @@ class Lumberjack extends Hierarchy {
 		$classes = array();
 		$siteTreeClasses = $this->owner->allowedChildren();
 		foreach($siteTreeClasses as $class) {
-			if(Config::inst()->get($class, 'show_in_sitetree') === false) {
+			if(Injector::inst()->create($class)->config()->show_in_sitetree === false) {
 				$classes[$class] = $class;
 			}
 		}
@@ -57,10 +57,9 @@ class Lumberjack extends Hierarchy {
 	/**
 	 * Augments (@link Hierarchy::stageChildren()}
 	 *
-	 * @param boolean showAll Include all of the elements, even those not shown in the menus.
-	 *   (only applicable when extension is applied to {@link SiteTree}).
-	 * @return DataList
-	 */
+	 * @param $staged DataList
+	 * @param $showAll boolean
+	 **/
 	public function stageChildren($showAll = false) {
 		$staged = parent::stageChildren($showAll);
 
@@ -73,13 +72,11 @@ class Lumberjack extends Hierarchy {
 
 
 	/**
-	 * Augments (@link Hierarchy::liveChildren()} by hiding excluded child classnames
+	 * Augments (@link Hierarchy::liveChildren()}
 	 *
-	 * @param boolean $showAll Include all of the elements, even those not shown in the menus.
-	 *   (only applicable when extension is applied to {@link SiteTree}).
-	 * @param boolean $onlyDeletedFromStage Only return items that have been deleted from stage
-	 * @return SS_List
-	 */
+	 * @param $staged DataList
+	 * @param $showAll boolean
+	 **/
 	public function liveChildren($showAll = false, $onlyDeletedFromStage = false) {
 		$staged = parent::liveChildren($showAll, $onlyDeletedFromStage);
 
@@ -87,7 +84,6 @@ class Lumberjack extends Hierarchy {
 			// Filter the SiteTree
 			return $staged->exclude("ClassName", $this->owner->getExcludedSiteTreeClassNames());
 		}
-		return $staged;
 	}
 
 
@@ -125,7 +121,7 @@ class Lumberjack extends Hierarchy {
 	 */
 	protected function shouldFilter() {
 		$controller = Controller::curr();
-		return $controller instanceof LeftAndMain
+		return get_class($controller) == "CMSPagesController"
 			&& in_array($controller->getAction(), array("treeview", "listview", "getsubtree"));
 	}
 

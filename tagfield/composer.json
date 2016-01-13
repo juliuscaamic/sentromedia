@@ -1,7 +1,7 @@
 {
 	"name": "silverstripe/tagfield",
 	"description": "Tag field for Silverstripe",
-	"license": "BSD-2-Clause",
+	"license": "BSD-3-Clause",
 	"type": "silverstripe-module",
 	"keywords": [
 		"silverstripe",
@@ -20,10 +20,5 @@
 	},
 	"require": {
 		"silverstripe/framework": "~3.1"
-	},
-	"extra": {
-		"branch-alias": {
-			"dev-develop": "2.0.x-dev"
-		}
 	}
 }

@@ -13,50 +13,32 @@
 class GridFieldSiteTreeAddNewButton extends GridFieldAddNewButton
 	implements GridField_ActionProvider {
 
-	/**
-	 * Determine the list of classnames and titles allowed for a given parent object
-	 *
-	 * @param SiteTree $parent
-	 * @return boolean
-	 */
-	public function getAllowedChildren(SiteTree $parent = null) {
-		if(!$parent || !$parent->canAddChildren()) {
-			return array();
-		}
 
+	public function getAllowedChildren(SiteTree $parent) {
 		$allowedChildren = $parent->allowedChildren();
+		if(empty($allowedChildren)) return array();
+
 		$children = array();
 		foreach($allowedChildren as $class) {
 			if(Config::inst()->get($class, "show_in_sitetree") === false) {
-				$instance = Injector::inst()->get($class);
-				// Note: Second argument to SiteTree::canCreate will support inherited permissions
-				// post 3.1.12, and will default to the old permission model in 3.1.11 or below
-				// See http://docs.silverstripe.org/en/changelogs/3.1.11
-				if($instance->canCreate(null, array('Parent' => $parent))) {
-					$children[$class] = $instance->i18n_singular_name();
-				}
+				$children[$class] = Injector::inst()->create($class)->i18n_singular_name();
 			}
 		}
 		return $children;
 	}
 
 	public function getHTMLFragments($gridField) {
-		$state = $gridField->State->GridFieldSiteTreeAddNewButton;
-
+		$model = Injector::inst()->create($gridField->getModelClass());
 		$parent = SiteTree::get()->byId(Controller::curr()->currentPageID());
 
-		if($parent) {
-			$state->currentPageID = $parent->ID;
+		if(!$model->canCreate()) {
+			return array();
 		}
 
 		$children = $this->getAllowedChildren($parent);
-		if(empty($children)) {
-			return array();
-		} else if(count($children) > 1) {
-			$pageTypes = DropdownField::create("PageType", "Page Type", $children, $parent->defaultChild());
+		if(count($children) > 1) {
+			$pageTypes = DropdownField::create("PageType", "Page Type", $children, $model->defaultChild());
 			$pageTypes->setFieldHolderTemplate("GridFieldSiteTreeAddNewButton_holder")->addExtraClass("gridfield-dropdown no-change-track");
-
-			$state->pageType = $parent->defaultChild();
 
 			if(!$this->buttonName) {
 				$this->buttonName = _t('GridFieldSiteTreeAddNewButton.AddMultipleOptions', 'Add new', "Add button text for multiple options.");
@@ -65,12 +47,14 @@ class GridFieldSiteTreeAddNewButton extends GridFieldAddNewButton
 			$keys = array_keys($children);
 			$pageTypes = HiddenField::create('PageType', 'Page Type', $keys[0]);
 
-			$state->pageType = $keys[0];
-
 			if(!$this->buttonName) {
 				$this->buttonName = _t('GridFieldSiteTreeAddNewButton.Add', 'Add new {name}', 'Add button text for a single option.', array($children[$keys[0]]));
 			}
 		}
+
+		$state = $gridField->State->GridFieldSiteTreeAddNewButton;
+		$state->currentPageID = $parent->ID;
+		$state->pageType = $parent->defaultChild();
 
 		$addAction = new GridField_FormAction($gridField, 'add', $this->buttonName, 'add', 'add');
 		$addAction->setAttribute('data-icon', 'add')->addExtraClass("no-ajax ss-ui-action-constructive dropdown-action");
@@ -91,7 +75,8 @@ class GridFieldSiteTreeAddNewButton extends GridFieldAddNewButton
 	/**
 	 * Provide actions to this component.
 	 *
-	 * @param GridField $gridField
+	 * @param $gridField GridField
+	 *
 	 * @return array
 	**/
 	public function getActions($gridField) {
@@ -103,17 +88,17 @@ class GridFieldSiteTreeAddNewButton extends GridFieldAddNewButton
 	/**
 	 * Handles the add action, but only acts as a wrapper for {@link CMSPageAddController::doAdd()}
 	 *
-	 * @param GridField $gridField
-	 * @param string $actionName
-	 * @param mixed $arguments
-	 * @param array $data
+	 * @param $gridFIeld GridFIeld
+	 * @param $actionName string
+	 * @param $arguments mixed
+	 * @param $data array
 	**/
 	public function handleAction(GridField $gridField, $actionName, $arguments, $data) {
 
 		if($actionName == "add") {
 			$tmpData = json_decode($data['ChildPages']['GridState'], true);
 			$tmpData = $tmpData['GridFieldSiteTreeAddNewButton'];
-
+			
 			$data = array(
 				"ParentID" => $tmpData['currentPageID'],
 				"PageType" => $tmpData['pageType']

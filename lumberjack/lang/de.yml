@@ -1,7 +1,0 @@
-de:
-  GridFieldSiteTreeAddNewButton:
-    Add: 'Neuen {name} hinzufügen'
-    AddMultipleOptions: 'Neuen hinzufügen'
-  GridFieldSiteTreeState:
-    Modified: Geändert
-    StateTitle: Status
