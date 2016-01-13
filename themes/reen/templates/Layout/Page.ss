@@ -39,7 +39,7 @@
 			<% end_if %>
 
 			<% if $ClassName == 'BlockBanner' %>
-				<section id="hero" class="img-bg-bottom light-bg img-bg-softer" style="<% if $Image %>background-image: url($Image.Link);<% end_if %>">
+				<section id="hero" class="dark-bg img-bg img-bg-soft" style="<% if $Image %>background-image: url($Image.Link);<% end_if %>">
 					<div class="container inner">
 						<div class="row">
 							<div class="col-sm-10">
