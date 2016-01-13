@@ -120,10 +120,15 @@
 
 	<% if $ActionBoxTitle %>
 		<section id="get-in-touch" class="tint-bg img-bg-soft img-bg" <% if $ActionBoxBackgroundImage %>style="background-image: url($ActionBoxBackgroundImage.Link);"<% end_if %>>
-				<div class="container inner-sm">
+				<div class="container">
 					<div class="row">
-						<div class="col-sm-10 center-block text-center">
-							<h1 class="single-block">$ActionBoxTitle</h1>
+						<div class="col-md-8 col-sm-9 inner center-block text-center">
+							<% if $ActionBoxTitle %>
+								<header>
+									<h1>$ActionBoxTitle</h1>
+								</header>
+							<% end_if %>
+
 							$ActionBoxContent
 
 							<% if $ActionBoxRedirectPage %>
