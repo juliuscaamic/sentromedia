@@ -425,6 +425,32 @@
 				</section>			
 			<% end_if %>
 
+			<% if $ClassName == 'BlockTwitter' %>
+				<section id="sliders" class="dark-bg img-bg-softer" style="background-image: url(reen/assets/images/twitter-background.jpg);">
+					<div class="container">
+						<div class="row">
+							<div class="col-md-12 inner-top-xs inner-bottom-xs">
+
+								<h1 class="text-center"><i class="icon-s-twitter"></i></h1>
+								<% if $Top.LatestTwitterFeeds %>
+									<div id="owl-work" class="owl-carousel owl-inner-nav owl-theme">
+									<% loop $Top.LatestTwitterFeeds %>								
+										<div class="item">
+											<label>
+												$Date
+											</label>
+											<p>$Content</p>
+											<a href="http://www.twitter.com/{$User}" target="_blank" class="User">@$User</a>
+										</div>
+									<% end_loop %>
+									</div>
+								<% end_if %>
+							</div>
+						</div>
+					</div>
+				</section>			
+			<% end_if %>
+
 		<% end_loop %>
 	<% else %>
 		<div class="container inner">

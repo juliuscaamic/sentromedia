@@ -6,5 +6,6 @@ class Block_Extension extends Extension {
 		$components['BlockTeam'] = 'Team';
 		$components['BlockContactForm'] = 'Contact Form';
 		$components['BlockCallOut'] = 'Call Out';
+		$components['BlockTwitter'] = 'Twitter';
 	}
 }

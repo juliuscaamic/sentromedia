@@ -84,4 +84,20 @@ class Page_Controller extends ContentController {
 	public function getContactPage() {
 		return ContactPage::get()->First();
 	}
+
+	public function getLatestTwitterFeeds() {
+		$list = new ArrayList();
+		$tweets = $this->LatestTweets();
+		if ($tweets) {
+			foreach ($tweets as $tweet) {
+				$list->push(new ArrayData(array(
+					'User' => $tweet->User,
+					'Date' => $tweet->Date->Long(),
+					'Content' => preg_replace("/<img[^>]+\>/i", "", $tweet->Content)
+				)));
+			}
+		}
+
+		return $list;
+	}	
 }
