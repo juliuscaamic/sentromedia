@@ -8,6 +8,15 @@
 class BlockTwitter extends Block {
 
 	/**
+	 * Set has one
+	 * 
+	 * @var array
+	 */
+	private static $has_one= array(
+		'BackgroundImage' => 'Image'
+	);
+
+	/**
 	 * Get component title
 	 * 
 	 * @var string
@@ -21,6 +30,14 @@ class BlockTwitter extends Block {
 	 */
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
+
+		$fields->removeByName('Content');
+
+		$fields->insertAfter(
+			UploadField::create('BackgroundImage', 'Background')
+				->setFolderName('Twitter'), 
+			'Title'
+		);
 
 		return $fields;
 	}

@@ -426,7 +426,7 @@
 			<% end_if %>
 
 			<% if $ClassName == 'BlockTwitter' %>
-				<section id="sliders" class="dark-bg img-bg-softer" style="background-image: url(reen/assets/images/twitter-background.jpg);">
+				<section id="sliders" class="dark-bg img-bg-softer" <% if $BackgroundImage %>style="background-image: url($BackgroundImage.Link);<% end_if %>">
 					<div class="container">
 						<div class="row">
 							<div class="col-md-12 inner-top-xs inner-bottom-xs">
