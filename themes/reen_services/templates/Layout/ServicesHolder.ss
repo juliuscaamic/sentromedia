@@ -60,6 +60,32 @@
 				</section>
 			<% end_if %>
 
+			<% if $ClassName == 'BlockTwitter' %>
+				<section id="sliders" class="light-bg img-bg-softer" <% if $BackgroundImage %>style="background-image: url($BackgroundImage.Link);<% end_if %>">
+					<div class="container">
+						<div class="row">
+							<div class="col-md-12 inner-top-xs inner-bottom-xs">
+
+								<h1 class="text-center"><i class="icon-s-twitter"></i></h1>
+								<% if $Top.LatestTwitterFeeds %>
+									<div id="owl-work" class="owl-carousel owl-inner-nav owl-theme">
+									<% loop $Top.LatestTwitterFeeds %>								
+										<div class="item">
+											<label>
+												$Date
+											</label>
+											<p>$Content</p>
+											<a href="http://www.twitter.com/{$User}" target="_blank" class="User">@$User</a>
+										</div>
+									<% end_loop %>
+									</div>
+								<% end_if %>
+							</div>
+						</div>
+					</div>
+				</section>			
+			<% end_if %>			
+
 		<% end_loop %>	
 	<% end_if %>
 </main>
