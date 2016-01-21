@@ -151,8 +151,7 @@ JS
 			TextField::create('Phone', false, Cookie::get('DataCaptureFormPhone'))
 				->setAttribute('placeholder', 'Phone'),
 			TextField::create('CompanyName', false, Cookie::get('DataCaptureFormCompanyName'))
-				->setAttribute('placeholder', 'Company Name'),
-			CheckboxField::create('Newsletter', 'Yes I want your monthly newsletter with great tips to improve my business')
+				->setAttribute('placeholder', 'Company Name')
 		);
 
 		$formAction = FormAction::create('doCapture')
@@ -161,7 +160,7 @@ JS
 		$formAction->addExtraClass('btn btn-default btn-submit');
 		$actions = new FieldList($formAction);
 
-		$required = new RequiredFields('Name', 'Email', 'Phone', 'Phone', 'CompanyName');
+		$required = new RequiredFields('Name', 'Email');
 
 		$form = new Form($this, 'Form', $fields, $actions, $required);
 		$form->addExtraClass('forms');
@@ -193,8 +192,7 @@ JS
 			'merge_vars'        => array(
 									'Name' => $data['Name'], 
 									'Phone' => $data['Phone'], 
-									'Business' => $data['CompanyName'], 
-									$this->MergeTag => 1
+									'Business' => $data['CompanyName']
 								),
 			'double_optin'      => false,
 			'update_existing'   => true,
@@ -203,20 +201,6 @@ JS
 		);
 
 		$result = $MailChimp->call('lists/subscribe', $apiData);
-
-		if (isset($data['Newsletter'])) {
-			$newsletterApiData = array(
-				'id'                => $settings->MailChimpList()->filter(array('Code' => 'NEWSLETTER'))->First()->ListID,
-				'email'             => array('email' => $data['Email']),
-				'merge_vars'        => array('Name' => $data['Name']),
-				'double_optin'      => false,
-				'update_existing'   => true,
-				'replace_interests' => false,
-				'send_welcome'      => false,
-			);
-
-			$newsLetterResult = $MailChimp->call('lists/subscribe', $newsletterApiData);
-		}
 
 		$this->redirect($this->RedirectPage()->Link());
 	}
