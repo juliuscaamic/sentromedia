@@ -147,11 +147,7 @@ JS
 			TextField::create('Name', false, Cookie::get('DataCaptureFormName'))
 				->setAttribute('placeholder', 'Full Name'),
 			EmailField::create('Email', false, Cookie::get('DataCaptureFormEmail'))
-				->setAttribute('placeholder', 'Email'),
-			TextField::create('Phone', false, Cookie::get('DataCaptureFormPhone'))
-				->setAttribute('placeholder', 'Phone'),
-			TextField::create('CompanyName', false, Cookie::get('DataCaptureFormCompanyName'))
-				->setAttribute('placeholder', 'Company Name')
+				->setAttribute('placeholder', 'Email')
 		);
 
 		$formAction = FormAction::create('doCapture')
@@ -179,8 +175,6 @@ JS
 	public function doCapture(Array $data, Form $form) {
 		Cookie::set('DataCaptureFormName', $data['Name'], 365);
 		Cookie::set('DataCaptureFormEmail', $data['Email'], 365);
-		Cookie::set('DataCaptureFormPhone', $data['Phone'], 365);
-		Cookie::set('DataCaptureFormCompanyName', $data['CompanyName'], 365);
 
 		$settings = SiteConfig::current_site_config();
 
@@ -190,9 +184,7 @@ JS
 			'id'                => $this->ListID,
 			'email'             => array('email' => $data['Email']),
 			'merge_vars'        => array(
-									'Name' => $data['Name'], 
-									'Phone' => $data['Phone'], 
-									'Business' => $data['CompanyName']
+									'Name' => $data['Name']
 								),
 			'double_optin'      => false,
 			'update_existing'   => true,
