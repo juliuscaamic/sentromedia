@@ -52,3 +52,7 @@ Member:
 Block:
   extensions:
     - Block_Extension
+
+Director:
+  rules:
+    'download//$Action/$ID/': 'DownloadController'
