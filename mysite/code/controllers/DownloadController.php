@@ -12,7 +12,7 @@ class DownloadController extends Controller {
 		if ($filename) {
 			$file = File::get()->filter('Name', $filename . '.pdf');
 			if ($file->exists()) {
-				return SS_HTTPRequest::send_file(file_get_contents(Director::absoluteBaseURL() . $file->Filename), $file->Name);
+				return SS_HTTPRequest::send_file(file_get_contents(Director::absoluteBaseURL() . $file->First()->Filename), $file->First()->Name);
 			}
 		}
 
