@@ -65,7 +65,7 @@
 								<div class="container">
 									<div class="caption vertical-center text-left">
 										<h1 class="fadeInRight-1 light-color"><span>$Title</span></h1>
-										<p>$Description</p>
+										$Description
 										<% if $RedirectPage %>
 											<div class="fadeInRight-3" style="z-index:3;">
 												<a href="$RedirectPage.Link" title="Go to $RedirectPage.Title page" class="btn btn-large btn-bordered">$RedirectButtonText</a>
