@@ -149,7 +149,7 @@
 											<div class="tab-content" id="tab-$Pos">
 												<div class="row">
 																										
-													<div class="<% if not $Image %>col-md-10 col-sm-12<% else %>col-md-5 col-sm-6<% end_if %> inner-top-xs inner-left-xs">
+													<div class="<% if not $Image %>col-md-10 col-sm-12<% else %>col-md-6 col-sm-6<% end_if %> inner-top-xs inner-left-xs">
 														$Content
 														<% if $RedirectPage %>
 															<a class="btn btn-large" title="Go to $RedirectPage.Title page" href="$RedirectPage.Link">$ButtonText</a>
@@ -157,7 +157,7 @@
 													</div>
 
 													<% if $Image %>
-														<div class="col-md-5 col-md-offset-1 col-sm-6 inner-right-xs">
+														<div class="col-md-4 col-md-offset-1 col-sm-6 inner-right-xs">
 															<figure>
 																<img src="$Image.Link" alt="$Image.Title">
 															</figure>
@@ -199,7 +199,7 @@
 												<figure>
 													<figcaption class="text-overlay">
 														<div class="info">
-															<h4>$Work.Title</h4>
+															<h2>$Work.Title</h2>
 														</div>
 													</figcaption>
 													<img src="$Work.FeaturedImage.CroppedImage(570, 390).Link" alt="$Work.FeaturedImage.Title">
@@ -240,13 +240,13 @@
 					<div class="container inner-xs">
 						<div class="row">
 							<div class="col-sm-12 center-block text-center">
-								<h3 class="single-block">$Title 
+								<h2 class="single-block">$Title 
 									<% if $RedirectPage %>
 										<a href="$RedirectPage.Link" class="btn btn-large btn-bordered">
 											$RedirectButtonText
 										</a>
 									<% end_if %>
-								</h3>
+								</h2>
 							</div>
 						</div>
 					</div>

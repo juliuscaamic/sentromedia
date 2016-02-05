@@ -20,13 +20,13 @@
 					<div class="container inner-xs">
 						<div class="row">
 							<div class="col-sm-12 center-block text-center">
-								<h3 class="single-block">$Title 
+								<h2 class="single-block">$Title 
 									<% if $RedirectPage %>
 										<a href="$RedirectPage.Link" class="btn btn-large btn-bordered">
 											$RedirectButtonText
 										</a>
 									<% end_if %>
-								</h3>
+								</h2>
 							</div>
 						</div>
 					</div>
@@ -87,7 +87,7 @@
 											<figure>
 												<figcaption class="text-overlay">
 													<div class="info">
-														<h4>$Title</h4>
+														<h2>$Title</h2>
 													</div>
 												</figcaption>
 												<img src="$FeaturedImage.CroppedImage(570, 390).Link" alt="$FeaturedImage.Title">
