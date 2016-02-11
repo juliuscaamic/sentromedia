@@ -56,4 +56,7 @@ class Work extends Blog {
 
 class Work_Controller extends Blog_Controller {
 
+	public function init() {
+		parent::init();
+	}
 }
