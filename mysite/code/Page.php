@@ -43,10 +43,7 @@ class Page_Controller extends ContentController {
 				'mailchimp/css/mailchimp.css'
 			)
 		);
-		Requirements::css('http://fonts.googleapis.com/css?family=Lato:400,900,300,700');
-		Requirements::css('http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic');
-		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:400,700');
-		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:700,400|Oranienbaum');		
+		Requirements::css('http://fonts.googleapis.com/css?family=Lato:400,900,300,700|Source+Sans+Pro:400,700,400italic,700italic');
 
 		Requirements::combine_files(
 			'script.js', 
