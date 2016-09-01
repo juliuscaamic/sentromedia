@@ -48,7 +48,6 @@ class Page_Controller extends ContentController {
 		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:400,700');
 		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:700,400|Oranienbaum');		
 
-		Requirements::javascript('https://maps.googleapis.com/maps/api/js?key=AIzaSyD0jji5gjOj_ImX4uSgNd0dwIy09yL7kbQ');
 		Requirements::combine_files(
 			'script.js', 
 			array(

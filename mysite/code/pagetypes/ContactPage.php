@@ -29,6 +29,8 @@ class ContactPage_Controller extends GenericPage_Controller {
 	public function init() {
 		parent::init();
 
+		Requirements::javascript('https://maps.googleapis.com/maps/api/js?key=AIzaSyD0jji5gjOj_ImX4uSgNd0dwIy09yL7kbQ');
+
 		$blockMap = $this->getBlockMap();
 		$title = '';
 		$lat = '';
