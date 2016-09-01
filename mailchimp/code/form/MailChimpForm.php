@@ -39,17 +39,6 @@ class MailChimpForm extends Form {
 		);
 
 		parent::__construct($controller, $name, $fields, $actions, $validator);
-
-		Requirements::css('mailchimp/css/mailchimp.css');
-		Requirements::javascript('mailchimp/javascript/jquery.mailchimp.js');
-		Requirements::customScript(<<<JS
-			(function($) {
-			    $(document).ready(function(){
-			        $('form#newsletter').mailchimp();
-			    });
-			})(jQuery);			
-JS
-		);
 	}
 
 	/**

@@ -1,23 +1,34 @@
 <?php
+/**
+ * Represents the page base class
+ *
+ * @author Julius <julius@sentromedia.com>
+ */
 class Page extends SiteTree {}
 
+/**
+ * Represents the page base class controller
+ *
+ * @author Julius <julius@sentromedia.com>
+ */
 class Page_Controller extends ContentController {
 
+	/**
+	 * Set allowed actions
+	 * 
+	 * @var array
+	 */
 	private static $allowed_actions = array(
 		'MailChimpForm', 
 		'SearchForm', 
 		'Form'
 	);
 
+	/**
+	 * Initialise the controller
+	 */
 	public function init() {
 		parent::init();
-
-		/*Requirements::css('themes/reen/css/bootstrap.min.css');
-		Requirements::css('themes/reen/css/main.css');
-		Requirements::css('themes/reen/css/green.css');
-		Requirements::css('themes/reen/css/owl.carousel.css');
-		Requirements::css('themes/reen/css/owl.transitions.css');
-		Requirements::css('themes/reen/css/animate.min.css');*/
 		
 		Requirements::combine_files(
 			'style.css', 
@@ -27,15 +38,15 @@ class Page_Controller extends ContentController {
 				'themes/reen/css/green.css', 
 				'themes/reen/css/owl.carousel.css', 
 				'themes/reen/css/owl.transitions.css', 
-				'themes/reen/css/animate.min.css'
+				'themes/reen/css/animate.min.css', 
+				'themes/reen/fonts/fontello.css', 
+				'mailchimp/css/mailchimp.css'
 			)
 		);
 		Requirements::css('http://fonts.googleapis.com/css?family=Lato:400,900,300,700');
 		Requirements::css('http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic');
 		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:400,700');
 		Requirements::css('https://fonts.googleapis.com/css?family=Old+Standard+TT:700,400|Oranienbaum');		
-
-		Requirements::css('themes/reen/fonts/fontello.css');
 
 		Requirements::javascript('https://maps.googleapis.com/maps/api/js?key=AIzaSyD0jji5gjOj_ImX4uSgNd0dwIy09yL7kbQ');
 		Requirements::combine_files(
@@ -55,25 +66,19 @@ class Page_Controller extends ContentController {
 				'themes/reen/js/jquery.isotope.min.js', 
 				'themes/reen/js/jquery.easytabs.min.js', 
 				'themes/reen/js/viewport-units-buggyfill.js', 
-				'themes/reen/js/scripts.js'
+				'themes/reen/js/scripts.js', 
+				'mailchimp/javascript/jquery.mailchimp.js'
 			)
 		);
-		/*Requirements::javascript('themes/reen/js/jquery.min.js');
-		Requirements::javascript('themes/reen/js/jquery.easing.1.3.min.js');
-		Requirements::javascript('themes/reen/js/jquery.form.js');
-		Requirements::javascript('themes/reen/js/jquery.validate.min.js');
-		Requirements::javascript('themes/reen/js/bootstrap.min.js');
-		Requirements::javascript('themes/reen/js/bootstrap-hover-dropdown.min.js');
-		Requirements::javascript('themes/reen/js/skrollr.min.js');
-		Requirements::javascript('themes/reen/js/skrollr.stylesheets.min.js');
-		Requirements::javascript('themes/reen/js/waypoints.min.js');
-		Requirements::javascript('themes/reen/js/waypoints-sticky.min.js');
-		Requirements::javascript('themes/reen/js/owl.carousel.min.js');
-		Requirements::javascript('themes/reen/js/jquery.isotope.min.js');
-		Requirements::javascript('themes/reen/js/jquery.easytabs.min.js');
-		Requirements::javascript('https://maps.googleapis.com/maps/api/js?key=AIzaSyD0jji5gjOj_ImX4uSgNd0dwIy09yL7kbQ');
-		Requirements::javascript('themes/reen/js/viewport-units-buggyfill.js');
-		Requirements::javascript('themes/reen/js/scripts.js');*/
+
+		Requirements::customScript(<<<JS
+			(function($) {
+			    $(document).ready(function(){
+			        $('form#newsletter').mailchimp();
+			    });
+			})(jQuery);
+JS
+		);
 	}
 
 	/**
