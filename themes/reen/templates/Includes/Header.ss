@@ -50,7 +50,7 @@
 					</ul>
 				<% end_if %>
 				
-				<a class="navbar-brand" href="/">
+				<a class="navbar-brand" href="$BaseHref">
 					<img src="$SiteConfig.Logo.Link" class="logo" alt="$SiteConfig.Title">
 				</a>
 				
@@ -63,7 +63,7 @@
 			<div class="navbar-collapse collapse">
 				<div class="container">
 					
-					<a class="navbar-brand" href="/">
+					<a class="navbar-brand" href="$BaseHref">
 						<img src="$SiteConfig.Logo.Link" class="logo" alt="$SiteConfig.Title">
 					</a>
 					

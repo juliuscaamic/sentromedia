@@ -30,7 +30,7 @@ class Page_Controller extends ContentController {
 	public function init() {
 		parent::init();
 		
-		Requirements::combine_files(
+		/*Requirements::combine_files(
 			'style.css', 
 			array(
 				'themes/reen/css/bootstrap.min.css', 
@@ -42,9 +42,11 @@ class Page_Controller extends ContentController {
 				'themes/reen/fonts/google-fonts.css', 
 				'mailchimp/css/mailchimp.css'
 			)
-		);
+		);*/
+		Requirements::css('themes/reen/css/style.css');
+		Requirements::javascript('themes/reen/js/script.js', true);
 
-		Requirements::combine_files(
+		/*Requirements::combine_files(
 			'script.js', 
 			array(
 				'themes/reen/js/jquery.min.js', 
@@ -64,7 +66,7 @@ class Page_Controller extends ContentController {
 				'themes/reen/js/scripts.js', 
 				'mailchimp/javascript/jquery.mailchimp.js'
 			)
-		);
+		);*/
 
 		Requirements::customScript(<<<JS
 			(function($) {
