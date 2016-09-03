@@ -38,7 +38,6 @@ class Page_Controller extends ContentController {
 				'themes/reen/css/green.css', 
 				'themes/reen/css/owl.carousel.css', 
 				'themes/reen/css/owl.transitions.css', 
-				'themes/reen/css/animate.min.css', 
 				'themes/reen/fonts/fontello.css', 
 				'themes/reen/fonts/google-fonts.css', 
 				'mailchimp/css/mailchimp.css'
