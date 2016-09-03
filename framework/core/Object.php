@@ -220,19 +220,23 @@ abstract class Object {
 		// Keep track of the current bucket that we're putting data into
 		$bucket = &$args;
 		$bucketStack = array();
-		$had_ns = false;
+		$hadNamespace = false;
+		$currentKey = null;
 
 		foreach($tokens as $token) {
-			$tName = is_array($token) ? $token[0] : $token;
-			// Get the class naem
-			if($class == null && is_array($token) && $token[0] == T_STRING) {
+			// $forceResult used to allow null result to be detected
+			$result = $forceResult = null;
+			$tokenName = is_array($token) ? $token[0] : $token;
+
+			// Get the class name
+			if($class === null && is_array($token) && $token[0] === T_STRING) {
 				$class = $token[1];
-			} elseif(is_array($token) && $token[0] == T_NS_SEPARATOR) {
+			} elseif(is_array($token) && $token[0] === T_NS_SEPARATOR) {
 				$class .= $token[1];
-				$had_ns = true;
-			} elseif ($had_ns && is_array($token) && $token[0] == T_STRING) {
+				$hadNamespace = true;
+			} elseif($hadNamespace && is_array($token) && $token[0] === T_STRING) {
 				$class .= $token[1];
-				$had_ns = false;
+				$hadNamespace = false;
 			// Get arguments
 			} else if(is_array($token)) {
 				switch($token[0]) {
@@ -240,52 +244,85 @@ abstract class Object {
 					$argString = $token[1];
 					switch($argString[0]) {
 					case '"':
-						$argString = stripcslashes(substr($argString,1,-1));
+								$result = stripcslashes(substr($argString,1,-1));
 						break;
 					case "'":
-						$argString = str_replace(array("\\\\", "\\'"),array("\\", "'"), substr($argString,1,-1));
+								$result = str_replace(array("\\\\", "\\'"),array("\\", "'"), substr($argString,1,-1));
 						break;
 					default:
 						throw new Exception("Bad T_CONSTANT_ENCAPSED_STRING arg $argString");
 					}
-					$bucket[] = $argString;
+
 					break;
 
 				case T_DNUMBER:
-					$bucket[] = (double)$token[1];
+						$result = (double)$token[1];
 					break;
 
 				case T_LNUMBER:
-					$bucket[] = (int)$token[1];
+						$result = (int)$token[1];
+						break;
+
+					case T_DOUBLE_ARROW:
+						// We've encountered an associative array (the array itself has already been
+						// added to the bucket), so the previous item added to the bucket is the key
+						end($bucket);
+						$currentKey = current($bucket);
+						array_pop($bucket);
 					break;
 
 				case T_STRING:
 					switch($token[1]) {
-						case 'true': $bucket[] = true; break;
-						case 'false': $bucket[] = false; break;
-						case 'null': $bucket[] = null; break;
+							case 'true': $result = true; break;
+							case 'false': $result = false; break;
+							case 'null': $result = null; $forceResult = true; break;
 						default: throw new Exception("Bad T_STRING arg '{$token[1]}'");
 					}
+						
 					break;
 
 				case T_ARRAY:
-					// Add an empty array to the bucket
-					$bucket[] = array();
-					$bucketStack[] = &$bucket;
-					$bucket = &$bucket[sizeof($bucket)-1];
+						$result = array();
+						break;
+				}
+			} else {
+				if($tokenName === '[') {
+					$result = array();
+				} elseif(($tokenName === ')' || $tokenName === ']') && ! empty($bucketStack)) {
+					// Store the bucket we're currently working on
+					$oldBucket = $bucket;
+					// Fetch the key for the bucket at the top of the stack
+					end($bucketStack);
+					$key = key($bucketStack);
+					reset($bucketStack);
+					// Re-instate the bucket from the top of the stack
+					$bucket = &$bucketStack[$key];
+					// Add our saved, "nested" bucket to the bucket we just popped off the stack
+					$bucket[$key] = $oldBucket;
+					// Remove the bucket we just popped off the stack
+					array_pop($bucketStack);
+				}
+			}
 
+			// If we've got something to add to the bucket, add it
+			if($result !== null || $forceResult) {
+				if($currentKey) {
+					$bucket[$currentKey] = $result;
+					$currentKey = null;
+				} else {
+					$bucket[] = $result;
 				}
 
-			} else {
-				if($tName == '[') {
-					// Add an empty array to the bucket
-					$bucket[] = array();
-					$bucketStack[] = &$bucket;
-					$bucket = &$bucket[sizeof($bucket)-1];
-				} elseif($tName == ')' || $tName == ']') {
-					// Pop-by-reference
-					$bucket = &$bucketStack[sizeof($bucketStack)-1];
-					array_pop($bucketStack);
+				// If we've just pushed an array, that becomes our new bucket
+				if($result === array()) {
+					// Fetch the key that the array was pushed to
+					end($bucket);
+					$key = key($bucket);
+					reset($bucket);
+					// Store reference to "old" bucket in the stack
+					$bucketStack[$key] = &$bucket;
+					// Set the active bucket to be our newly-pushed, empty array
+					$bucket = &$bucket[$key];
 				}
 			}
 		}
@@ -509,13 +546,17 @@ abstract class Object {
 		}
 		$extensionClass = $matches[1];
 		if(!class_exists($extensionClass)) {
-			user_error(sprintf('Object::add_extension() - Can\'t find extension class for "%s"', $extensionClass),
-				E_USER_ERROR);
+			user_error(
+				sprintf('Object::add_extension() - Can\'t find extension class for "%s"', $extensionClass),
+				E_USER_ERROR
+			);
 		}
 
 		if(!is_subclass_of($extensionClass, 'Extension')) {
-			user_error(sprintf('Object::add_extension() - Extension "%s" is not a subclass of Extension',
-				$extensionClass), E_USER_ERROR);
+			user_error(
+				sprintf('Object::add_extension() - Extension "%s" is not a subclass of Extension', $extensionClass),
+				E_USER_ERROR
+			);
 		}
 
 		// unset some caches
@@ -812,7 +853,9 @@ abstract class Object {
 		}
 
 		if(method_exists($extension, 'allMethodNames')) {
+			if ($extension instanceof Extension) $extension->setOwner($this);
 			$methods = $extension->allMethodNames(true);
+			if ($extension instanceof Extension) $extension->clearOwner();
 
 		} else {
 			if(!isset(self::$built_in_methods[$extension->class])) {
@@ -966,7 +1009,7 @@ abstract class Object {
 
 		if(!empty($this->beforeExtendCallbacks[$method])) {
 			foreach(array_reverse($this->beforeExtendCallbacks[$method]) as $callback) {
-				$value = call_user_func($callback, $a1, $a2, $a3, $a4, $a5, $a6, $a7);
+				$value = call_user_func_array($callback, array(&$a1, &$a2, &$a3, &$a4, &$a5, &$a6, &$a7));
 				if($value !== null) $values[] = $value;
 			}
 			$this->beforeExtendCallbacks[$method] = array();
@@ -983,7 +1026,7 @@ abstract class Object {
 
 		if(!empty($this->afterExtendCallbacks[$method])) {
 			foreach(array_reverse($this->afterExtendCallbacks[$method]) as $callback) {
-				$value = call_user_func($callback, $a1, $a2, $a3, $a4, $a5, $a6, $a7);
+				$value = call_user_func_array($callback, array(&$a1, &$a2, &$a3, &$a4, &$a5, &$a6, &$a7));
 				if($value !== null) $values[] = $value;
 			}
 			$this->afterExtendCallbacks[$method] = array();
@@ -1046,6 +1089,8 @@ abstract class Object {
 	 * @return mixed the cached data
 	 */
 	public function cacheToFile($method, $lifetime = 3600, $ID = false, $arguments = array()) {
+		Deprecation::notice('4.0', 'Caching methods on Object have been deprecated. Use the SS_Cache API instead.');
+
 		if(!$this->hasMethod($method)) {
 			throw new InvalidArgumentException("Object->cacheToFile(): the method $method does not exist to cache");
 		}
@@ -1073,6 +1118,8 @@ abstract class Object {
 	 * Clears the cache for the given cacheToFile call
 	 */
 	public function clearCache($method, $ID = false, $arguments = array()) {
+		Deprecation::notice('4.0', 'Caching methods on Object have been deprecated. Use the SS_Cache API instead.');
+
 		$cacheName = $this->class . '_' . $method;
 		if(!is_array($arguments)) $arguments = array($arguments);
 		if($ID) $cacheName .= '_' . $ID;
@@ -1090,6 +1137,8 @@ abstract class Object {
 	 * @return mixed
 	 */
 	protected function loadCache($cache, $lifetime = 3600) {
+		Deprecation::notice('4.0', 'Caching methods on Object have been deprecated. Use the SS_Cache API instead.');
+
 		$path = TEMP_FOLDER . '/' . $this->sanitiseCachename($cache);
 
 		if(!isset($_REQUEST['flush']) && file_exists($path) && (filemtime($path) + $lifetime) > time()) {
@@ -1106,6 +1155,7 @@ abstract class Object {
 	 * @param mixed $data data to save (must be serializable)
 	 */
 	protected function saveCache($cache, $data) {
+		Deprecation::notice('4.0', 'Caching methods on Object have been deprecated. Use the SS_Cache API instead.');
 		file_put_contents(TEMP_FOLDER . '/' . $this->sanitiseCachename($cache), serialize($data));
 	}
 
@@ -1116,6 +1166,7 @@ abstract class Object {
 	 * @return string the name with all special cahracters replaced with underscores
 	 */
 	protected function sanitiseCachename($name) {
+		Deprecation::notice('4.0', 'Caching methods on Object have been deprecated. Use the SS_Cache API instead.');
 		return str_replace(array('~', '.', '/', '!', ' ', "\n", "\r", "\t", '\\', ':', '"', '\'', ';'), '_', $name);
 	}
 

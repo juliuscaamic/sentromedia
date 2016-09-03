@@ -1,6 +1,7 @@
 {
 	"name": "silverstripe/reports",
 	"type": "silverstripe-module",
+	"description": "Reports module for SilverStripe CMS",
 	"homepage": "http://silverstripe.org",
 	"license": "BSD-3-Clause",
 	"keywords": ["silverstripe", "cms", "reports"],
@@ -15,8 +16,8 @@
 		}
 	],
 	"require": {
-		"php": ">=5.3.3",
-		"silverstripe/framework": "~3.2"
+		"php": ">=5.3.3,<7",
+		"silverstripe/framework": "~3.3"
 	},
 	"require-dev": {
 		"phpunit/PHPUnit": "~3.7"

@@ -217,14 +217,18 @@ class SiteTreeLinkTracking_Parser {
 			$matches = array();
 			if(preg_match('/\[sitetree_link(?:\s*|%20|,)?id=([0-9]+)\](#(.*))?/i', $href, $matches)) {
 				$page = DataObject::get_by_id('SiteTree', $matches[1]);
+				$broken = false;
+
 				if (!$page) {
 					// Page doesn't exist.
 					$broken = true;
-				} else if (!empty($matches[3]) && !preg_match("/(name|id)=\"{$matches[3]}\"/", $page->Content)) {
-					// Broken anchor on the target page.
-					$broken = true;
-				} else {
-					$broken = false;
+				} else if (!empty($matches[3])) {
+					$anchor = preg_quote($matches[3], '/');
+
+					if (!preg_match("/(name|id)=\"{$anchor}\"/", $page->Content)) {
+						// Broken anchor on the target page.
+						$broken = true;
+					}
 				}
 
 				$results[] = array(
@@ -255,12 +259,13 @@ class SiteTreeLinkTracking_Parser {
 			// Local anchor.
 			$matches = array();
 			if(preg_match('/^#(.*)/i', $href, $matches)) {
+				$anchor = preg_quote($matches[1], '#');
 				$results[] = array(
 					'Type' => 'localanchor',
 					'Target' => null,
 					'Anchor' => $matches[1],
 					'DOMReference' => $link,
-					'Broken' => !preg_match("#(name|id)=\"{$matches[1]}\"#", $htmlValue->getContent())
+					'Broken' => !preg_match("#(name|id)=\"{$anchor}\"#", $htmlValue->getContent())
 				);
 
 				continue;

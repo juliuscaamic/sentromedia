@@ -24,7 +24,6 @@ nb:
     FROMCOMPUTER: 'Velg filer fra din pc'
     FROMCOMPUTERINFO: 'Last opp fra din pc'
     TOTAL: Total
-    TOUPLOAD: 'Velg filer til opplasting ...'
     UPLOADINPROGRESS: 'Vennligst vent... opplasting pågår'
     UPLOADOR: ELLER
   BBCodeParser:
@@ -123,7 +122,6 @@ nb:
     INVALID_REQUEST: 'Ugyldig forespørsel'
   DropdownField:
     CHOOSE: (Velg)
-    CHOOSESEARCH: '(Velg eller søk)'
   EmailField:
     VALIDATION: 'Vennligst skriv inn en epostadresse'
   Enum:
@@ -146,15 +144,12 @@ nb:
     JsType: 'Javascript-fil'
     Mp3Type: 'MP3 lydfil'
     MpgType: 'MPEG videofil'
-    NOFILESIZE: 'Filstørrelsen var 0 bytes.'
     NOVALIDUPLOAD: 'Filen er ikke en gyldig opplasting'
     Name: Navn
     PLURALNAME: Filer
     PdfType: 'Adobe Acrobat PDF-fil'
     PngType: 'PNG-bilde - bra til de fleste formål'
     SINGULARNAME: Fil
-    TOOLARGE: 'Filstørrelse for stor, maksimum {size} tillatt '
-    TOOLARGESHORT: 'Filstørrelse overstiger {size}'
     TiffType: 'Tagged image format'
     Title: Tittel
     WavType: 'WAV lydfil'
@@ -271,7 +266,6 @@ nb:
     IMAGETITLETEXT: 'Titteltekst (tooltip)'
     IMAGETITLETEXTDESC: 'For tilleggsinformasjon om bilde'
     IMAGEWIDTHPX: Bredde
-    INSERTMEDIA: 'Sett inn media'
     LINK: 'Sett inn/rediger lenke i fremhevet tekst'
     LINKANCHOR: 'Lenke på denne siden'
     LINKDESCR: 'Lenkebeskrivelse'
@@ -284,7 +278,6 @@ nb:
     PAGE: Side
     URL: Nettadresse
     URLNOTANOEMBEDRESOURCE: 'Nettadressen ''{url}'' kunne ikke bli omgjort til en medieressurs.'
-    UpdateMEDIA: 'Oppdater media'
   Image:
     PLURALNAME: Filer
     SINGULARNAME: Fil
@@ -296,7 +289,6 @@ nb:
   LeftAndMain:
     CANT_REORGANISE: 'Du har ikke tilgang til å endre toppnivåsider. Endringen din ble ikke lagret.'
     DELETED: Slettet.
-    DropdownBatchActionsDefault: Handlinger
     HELP: Hjelp
     PERMAGAIN: 'Du har blitt logget ut av publiseringssystemet. Hvis du vil logge deg på igjen, skriv inn brukernavn og passord under.'
     PreviewButton: Forhåndsvisning
@@ -341,13 +333,11 @@ nb:
     NoPassword: 'Det finnes ikke noe passord for dette medlemmet.'
     PASSWORD: Passord
     PLURALNAME: Medlemmer
-    REMEMBERME: 'Husk meg neste gang?'
     SINGULARNAME: Medlem
     SUBJECTPASSWORDCHANGED: 'Passordet ditt har blitt endret'
     SUBJECTPASSWORDRESET: 'Lenke for nullstilling av passord'
     SURNAME: Etternavn
     TIMEFORMAT: 'Tidsformat'
-    VALIDATIONMEMBEREXISTS: 'Det eksisterer allerede et medlem med samme %s'
     ValidationIdentifierFailed: 'Kan ikke overskrive eksisterende medlem #{id} med identisk identifikator ({name})={value}))'
     WELCOMEBACK: 'Velkommen tilbake, {firstname}'
     YOUROLDPASSWORD: 'Ditt gamle passord'

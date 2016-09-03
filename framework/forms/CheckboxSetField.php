@@ -54,9 +54,7 @@ class CheckboxSetField extends OptionsetField {
 			'Options' => $this->getOptions()
 		));
 
-		return $this->customise($properties)->renderWith(
-			$this->getTemplates()
-		);
+		return FormField::Field($properties);
 	}
 
 	/**
@@ -134,11 +132,14 @@ class CheckboxSetField extends OptionsetField {
 		}
 
 		foreach($source as $value => $item) {
+			// Ensure $title is cast for template
 			if($item instanceof DataObject) {
 				$value = $item->ID;
-				$title = $item->Title;
-			} else {
+				$title = $item->obj('Title');
+			} elseif ($item instanceof DBField) {
 				$title = $item;
+			} else {
+				$title = DBField::create_field('Text', $item);
 			}
 
 			$itemID = $this->ID() . '_' . preg_replace('/[^a-zA-Z0-9]/', '', $value);

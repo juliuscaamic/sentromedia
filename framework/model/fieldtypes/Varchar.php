@@ -50,11 +50,14 @@ class Varchar extends StringField {
  	 * @see DBField::requireField()
  	 */
 	public function requireField() {
+		$charset = Config::inst()->get('MySQLDatabase', 'charset');
+		$collation = Config::inst()->get('MySQLDatabase', 'collation');
+
 		$parts = array(
 			'datatype'=>'varchar',
 			'precision'=>$this->size,
-			'character set'=>'utf8',
-			'collate'=>'utf8_general_ci',
+			'character set'=> $charset,
+			'collate'=> $collation,
 			'arrayValue'=>$this->arrayValue
 		);
 
@@ -70,15 +73,19 @@ class Varchar extends StringField {
 	 * Return the first letter of the string followed by a .
 	 */
 	public function Initial() {
-		if($this->exists()) return $this->value[0] . '.';
+		if($this->exists()) {
+			$value = $this->RAW();
+			return $value[0] . '.';
+		}
 	}
 
 	/**
 	 * Ensure that the given value is an absolute URL.
 	 */
 	public function URL() {
-		if(preg_match('#^[a-zA-Z]+://#', $this->value)) return $this->value;
-		else return "http://" . $this->value;
+		$value = $this->RAW();
+		if(preg_match('#^[a-zA-Z]+://#', $value)) return $value;
+		else return "http://" . $value;
 	}
 
 	/**
@@ -86,7 +93,7 @@ class Varchar extends StringField {
 	 * @return string
 	 */
 	public function RTF() {
-		return str_replace("\n", '\par ', $this->value);
+		return str_replace("\n", '\par ', $this->RAW());
 	}
 
 	/**

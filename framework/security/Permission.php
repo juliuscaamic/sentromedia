@@ -17,7 +17,7 @@ class Permission extends DataObject implements TemplateGlobalProvider {
 	// the (1) after Type specifies the DB default value which is needed for
 	// upgrades from older SilverStripe versions
 	private static $db = array(
-		"Code" => "Varchar",
+		"Code" => "Varchar(255)",
 		"Arg" => "Int",
 		"Type" => "Int(1)"
 	);
@@ -163,6 +163,10 @@ class Permission extends DataObject implements TemplateGlobalProvider {
 			$memberID = (is_object($member)) ? $member->ID : $member;
 		}
 
+		if (!$memberID) {
+			return false;
+		}
+
 		// Turn the code into an array as we may need to add other permsissions to the set we check
 		if(!is_array($code)) $code = array($code);
 
@@ -181,13 +185,12 @@ class Permission extends DataObject implements TemplateGlobalProvider {
 						}
 					}
 				}
-				elseif (substr($permCode, 0, 11) === 'CMS_ACCESS_') {
+				elseif (substr($permCode, 0, 11) === 'CMS_ACCESS_' && !in_array('CMS_ACCESS_LeftAndMain', $code)) {
 					//cms_access_leftandmain means access to all CMS areas
 					$code[] = 'CMS_ACCESS_LeftAndMain';
-					break;
 				}
 			}
-			
+
 			// if ADMIN has all privileges, then we need to push that code in
 			if($adminImpliesAll) {
 				$code[] = "ADMIN";

@@ -10,11 +10,6 @@
  * @subpackage security
  */
 abstract class LoginForm extends Form {
-	public function __construct($controller, $name, $fields, $actions) {
-		parent::__construct($controller, $name, $fields, $actions);
-
-		$this->disableSecurityToken();
-	}
 
 	/**
 	 * Authenticator class to use with this login form
@@ -28,7 +23,7 @@ abstract class LoginForm extends Form {
 
 	/**
 	 * Get the authenticator instance
-	 * 
+	 *
 	 * @return Authenticator Returns the authenticator instance for this login form.
 	 */
 	public function getAuthenticator() {

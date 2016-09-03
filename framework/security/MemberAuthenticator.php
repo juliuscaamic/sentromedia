@@ -51,8 +51,11 @@ class MemberAuthenticator extends Authenticator {
 		if($asDefaultAdmin) {
 			// If logging is as default admin, ensure record is setup correctly
 			$member = Member::default_admin();
-			$success = Security::check_default_admin($email, $data['Password']);
-			if($success) return $member;
+			$success = !$member->isLockedOut() && Security::check_default_admin($email, $data['Password']);
+			//protect against failed login
+			if($success) {
+				return $member;
+			}
 		}
 
 		// Attempt to identify user by email
@@ -141,10 +144,10 @@ class MemberAuthenticator extends Authenticator {
 	public static function authenticate($data, Form $form = null) {
 		// Find authenticated member
 		$member = static::authenticate_member($data, $form, $success);
-		
+
 		// Optionally record every login attempt as a {@link LoginAttempt} object
 		static::record_login_attempt($data, $member, $success);
-		
+
 		// Legacy migration to precision-safe password hashes.
 		// A login-event with cleartext passwords is the only time
 		// when we can rehash passwords to a different hashing algorithm,

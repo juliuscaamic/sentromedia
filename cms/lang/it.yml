@@ -9,6 +9,7 @@ it:
     AppCategoryImage: Immagine
     AppCategoryVideo: Video
     BackToFolder: 'Torna alla cartella'
+    CMSMENU_OLD: 'Files (vecchio)'
     CREATED: Data creazione
     CurrentFolderOnly: 'Limita alla cartella corrente?'
     DetailsView: Dettagli
@@ -76,7 +77,7 @@ it:
   CMSMain:
     ACCESS: 'Accesso alla sezione ''{title}'''
     ACCESS_HELP: 'Consente la visualizzazione della sezione con l''albero delle pagine e i contenuti. I permessi di visualizzazione e modifica possono essere gestiti attraverso menù a tendina specifici della pagina, come dai separati "Permessi sui contenuti".'
-    ARCHIVE: Archiviare
+    ARCHIVE: Archivia
     ARCHIVEDPAGE: 'Pagina ''%s'' archiviata'
     AddNew: 'Aggiungi nuova pagina'
     AddNewButton: 'Aggiungi nuova'
@@ -92,16 +93,14 @@ it:
     DUPLICATEDWITHCHILDREN: '''{title}'' e figlie duplicate con successo'
     EMAIL: Email
     EditTree: 'Modifica albero'
-    ListFiltered: 'Lista filtrata.'
     MENUTITLE: 'Modifica pagina'
     NEWPAGE: 'Nuova {pagetype}'
     PAGENOTEXISTS: 'Questa pagina non esiste'
-    PAGES: Pagine
     PAGETYPEANYOPT: Qualsiasi
-    PAGETYPEOPT: 'Tipo di pagina'
     PUBALLCONFIRM: 'Per favore pubblica ogni singola pagina nel sito, copiando i contenuti da ''bozza'' a ''pubblicato''.'
     PUBALLFUN: 'Funzione "Pubblica tutto"'
     PUBALLFUN2: "Cliccare questo bottone equivale ad accedere a tutte le pagine e cliccare 'pubblica'. Tale bottone è inteso per essere utilizzato dopo aver apportato modifiche di massa ai contenuti, come nella prima pubblicazione del sito."
+    PUBLISHED: 'Pubblicata ''{title}'' con successo.'
     PUBPAGES: 'Fatto: Pubblicate {count} pagine'
     PageAdded: 'Pagina creata con successo'
     REMOVED: '''{title}'' {description} rimosso dal sito pubblico'
@@ -115,15 +114,12 @@ it:
     ROLLEDBACKPUBv2: 'Ripristinata la versione pubblicata.'
     ROLLEDBACKVERSIONv2: 'Ripristinata la versione #%d.'
     SAVE: Salva
-    SAVEDRAFT: 'Bozza salvata'
+    SAVED: '''{title}'' salvata correttamente.'
+    SAVEDRAFT: 'Salva bozza'
     TabContent: Contenuto
     TabHistory: Archivio
     TabSettings: Impostazioni
-    TreeFiltered: 'Albero filtrato.'
-    TreeFilteredClear: 'Azzera filtro'
   CMSMain_left_ss:
-    APPLY_FILTER: 'Applica filtro'
-    CLEAR_FILTER: 'Azzera filtro'
     RESET: Azzera
   CMSPageAddController:
     MENUTITLE: 'Aggiungi pagina'
@@ -155,8 +151,6 @@ it:
     ListView: 'Visualizzazione a lista'
     MENUTITLE: Pagine
     TreeView: 'Visualizzazione a albero'
-  CMSPagesController_ContentToolbar_ss:
-    MULTISELECT: Selezione multipla
   CMSPagesController_Tools_ss:
     FILTER: Filtra
   CMSSIteTreeFilter_PublishedPages:
@@ -165,7 +159,7 @@ it:
     FILTERDATEFROM: Da
     FILTERDATEHEADING: Data
     FILTERDATETO: A
-    FILTERLABELTEXT: Contenuto
+    PAGEFILTERDATEHEADING: 'Ultima modifica'
   CMSSettingsController:
     MENUTITLE: Impostazioni
   CMSSiteTreeFilter_Search:
@@ -230,8 +224,10 @@ it:
     DEFAULTSERVERERRORPAGETITLE: 'Errore server'
     DESCRIPTION: 'Contenuto personalizzato per differenti casi di errore (es. "Pagina non trovata")'
     ERRORFILEPROBLEM: 'Errore nell''apertura del file "{filename}" per la scrittura. Controlla i permessi del file.'
-    PLURALNAME: 'Pagine di errore'
+    PLURALNAME: 'Pagine Errore'
     SINGULARNAME: 'Pagine errore'
+  File:
+    Title: Titolo
   Folder:
     AddFolderButton: 'Aggiungi cartella'
     DELETEUNUSEDTHUMBNAILS: 'Elimina anteprime inutilizzate'

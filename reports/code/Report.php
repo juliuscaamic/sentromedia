@@ -220,10 +220,6 @@ class SS_Report extends ViewableData {
 	public function getCMSFields() {
 		$fields = new FieldList();
 
-		if($title = $this->title()) {
-			$fields->push(new LiteralField('ReportTitle', "<h3>{$title}</h3>"));
-		}
-		
 		if($description = $this->description()) {
 			$fields->push(new LiteralField('ReportDescription', "<p>" . $description . "</p>"));
 		}
@@ -270,7 +266,6 @@ class SS_Report extends ViewableData {
 		$items = $this->sourceRecords($params, null, null);
 
 		$gridFieldConfig = GridFieldConfig::create()->addComponents(
-			new GridFieldToolbarHeader(),
 			new GridFieldSortableHeader(),
 			new GridFieldDataColumns(),
 			new GridFieldPaginator(),
@@ -278,7 +273,7 @@ class SS_Report extends ViewableData {
 			new GridFieldPrintButton('buttons-after-left'),
 			new GridFieldExportButton('buttons-after-left')
 		);
-		$gridField = new GridField('Report',$this->title(), $items, $gridFieldConfig);
+		$gridField = new GridField('Report',null, $items, $gridFieldConfig);
 		$columns = $gridField->getConfig()->getComponentByType('GridFieldDataColumns');
 		$displayFields = array();
 		$fieldCasting = array();
@@ -293,8 +288,20 @@ class SS_Report extends ViewableData {
 			if(isset($info['casting'])) $fieldCasting[$source] = $info['casting'];
 
 			if(isset($info['link']) && $info['link']) {
-				$link = singleton('CMSPageEditController')->Link('show');
-				$fieldFormatting[$source] = '<a href=\"' . $link . '/$ID\">$value</a>';
+				$fieldFormatting[$source] = function($value, $item) {
+					$title = Convert::raw2xml($value);
+
+					// If this item is previewable, decorate with link
+					if ($item instanceof CMSPreviewable) {
+						return sprintf(
+							'<a href="%s" title="%s">%s</a>',
+							$item->CMSEditLink(), $title, $title
+						);
+					}
+
+					// Fall back to basic title
+					return $title;
+				};
 			}
 
 			$displayFields[$source] = isset($info['title']) ? $info['title'] : $source;
@@ -314,8 +321,38 @@ class SS_Report extends ViewableData {
 		if(!$member && $member !== FALSE) {
 			$member = Member::currentUser();
 		}
-		
-		return true;
+
+		$extended = $this->extendedCan('canView', $member);
+		if($extended !== null) {
+			return $extended;
+		}
+
+		if($member && Permission::checkMember($member, array('CMS_ACCESS_LeftAndMain', 'CMS_ACCESS_ReportAdmin'))) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Helper to assist with permission extension
+	 *
+	 * {@see DataObject::extendedCan()}
+	 *
+	 * @param string $methodName Method on the same object, e.g. {@link canEdit()}
+	 * @param Member|int $member
+	 * @return boolean|null
+	 */
+	public function extendedCan($methodName, $member) {
+		$results = $this->extend($methodName, $member);
+		if($results && is_array($results)) {
+			// Remove NULLs
+			$results = array_filter($results, function($v) {return !is_null($v);});
+			// If there are any non-NULL responses, then return the lowest one of them.
+			// If any explicitly deny the permission, then we don't get access
+			if($results) return min($results);
+		}
+		return null;
 	}
 	
 

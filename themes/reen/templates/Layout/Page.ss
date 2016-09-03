@@ -1,4 +1,5 @@
 <main>
+<% cached 'BlockCached', LastEdited %>
 	<% if $Blocks %>
 		<% loop $Blocks %>
 
@@ -464,5 +465,5 @@
 			</div>
 		</div>
 	<% end_if %>
-
+<% end_cached %>
 </main>

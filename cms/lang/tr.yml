@@ -1,9 +1,12 @@
 tr:
   AssetAdmin:
+    ADDFILES: 'Dosyaları ekle'
     ActionAdd: 'Klasör ekle'
     AppCategoryArchive: Arşiv
     AppCategoryAudio: Ses
+    AppCategoryDocument: Belge
     AppCategoryImage: Görüntü
+    AppCategoryVideo: Video
     FILES: Dosyalar
     Filetype: 'Dosya türü'
     NEWFOLDER: YeniKlasör
@@ -37,8 +40,6 @@ tr:
     EMAIL: Eposta
     MENUTITLE: 'Sayfayı düzenle'
     PAGENOTEXISTS: 'Sayfa bulunamadı'
-    PAGES: Sayfalar
-    PAGETYPEOPT: 'Sayfa Tipi'
     PUBALLCONFIRM: 'Lütfen taslak sitedeki tüm sayfaları yayınlanmakta olan siteye kopyalayıp yayınla.'
     PUBALLFUN: '"Hepsini Yayınla" özelliği'
     PUBALLFUN2: "Bu butona bastığınız zaman, tüm sayfaları tek tek açıp \"yayınla\" butonuna basmışsınız gibi işlem yapılacaktır.  Bunun amacı sitede toplu miktarda içerik düzenleyip eklediyseniz (örneğin sitenin ilk yayınlanması gibi) size kolaylık sağlamaktır."
@@ -50,7 +51,6 @@ tr:
     TabHistory: Geçmiş
     TabSettings: Ayarlar
   CMSMain_left_ss:
-    APPLY_FILTER: 'Filteri Uygula'
     RESET: Sıfırla
   CMSPageAddController:
     MENUTITLE: 'Sayfa ekle'
@@ -169,9 +169,7 @@ tr:
     BUTTONUNPUBLISHDESC: 'Bu sayfayı yayından kaldır'
     Comments: Yorumlar
     Content: İçerik
-    DEFAULTABOUTCONTENT: '<p>Bu sayfayı kendi içeriğinizle doldurabilir, ya da bu sayfayı silip kendi sayfalarınızı oluşturabilirsiniz.<br /></p>'
     DEFAULTABOUTTITLE: 'Hakkımızda'
-    DEFAULTCONTACTCONTENT: '<p>Bu sayfayı kendi içeriğinizle doldurabilir, ya da bu sayfayı silip kendi sayfalarınızı oluşturabilirsiniz.<br /></p>'
     DEFAULTCONTACTTITLE: 'İletişim'
     DEFAULTHOMETITLE: Anasayfa
     DependtPageColumnLinkType: 'Link tipi'

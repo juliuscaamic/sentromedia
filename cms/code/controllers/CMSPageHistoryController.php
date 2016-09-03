@@ -358,7 +358,7 @@ class CMSPageHistoryController extends CMSMain {
 	/**
 	 * @param int $versionID
 	 * @param int $otherVersionID
-	 * @return Form
+	 * @return mixed
 	 */
 	public function CompareVersionsForm($versionID, $otherVersionID) {
 		if($versionID > $otherVersionID) {
@@ -369,16 +369,18 @@ class CMSPageHistoryController extends CMSMain {
 			$fromVersion = $versionID;
 		}
 
-		if(!$toVersion || !$toVersion) return false;
+		if(!$toVersion || !$fromVersion) return false;
 		
 		$id = $this->currentPageID();
 		$page = DataObject::get_by_id("SiteTree", $id);
 		
-		if($page && !$page->canView()) {
+ 		if($page && $page->exists()) {
+			if(!$page->canView()) {
 			return Security::permissionFailure($this);
 		}
 
 		$record = $page->compareVersions($fromVersion, $toVersion);
+		}
 
 		$fromVersionRecord = Versioned::get_version('SiteTree', $id, $fromVersion);
 		$toVersionRecord = Versioned::get_version('SiteTree', $id, $toVersion);
@@ -391,7 +393,7 @@ class CMSPageHistoryController extends CMSMain {
 			user_error("Can't find version $toVersion of page $id", E_USER_ERROR);
 		}
 
-		if($record) {
+		if(isset($record)) {
 			$form = $this->getEditForm($id, null, null, true);
 			$form->setActions(new FieldList());
 			$form->addExtraClass('compare');
@@ -414,6 +416,8 @@ class CMSPageHistoryController extends CMSMain {
 			
 			return $form;
 		}
+        
+        	return false;
 	}
 
 	public function Breadcrumbs($unlinked = false) {

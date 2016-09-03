@@ -655,15 +655,50 @@ class SS_HTTPRequest implements ArrayAccess {
 	 * @return string
 	 */
 	public function getIP() {
-		if (TRUSTED_PROXY && !empty($_SERVER['HTTP_CLIENT_IP'])) {
-			//check ip from share internet
-			return $_SERVER['HTTP_CLIENT_IP'];
-		} elseif (TRUSTED_PROXY && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-			//to check ip is pass from proxy
-			return  $_SERVER['HTTP_X_FORWARDED_FOR'];
+		$headerOverrideIP = null;
+		if(TRUSTED_PROXY) {
+			$headers = (defined('SS_TRUSTED_PROXY_IP_HEADER')) ? array(SS_TRUSTED_PROXY_IP_HEADER) : null;
+			if(!$headers) {
+				// Backwards compatible defaults
+				$headers = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR');
+			}
+			foreach($headers as $header) {
+				if(!empty($_SERVER[$header])) {
+					$headerOverrideIP = $_SERVER[$header];
+					break;
+				}
+			}
+		}
+
+		if ($headerOverrideIP) {
+			return $this->getIPFromHeaderValue($headerOverrideIP);
 		} elseif(isset($_SERVER['REMOTE_ADDR'])) {
 			return $_SERVER['REMOTE_ADDR'];
+		} else {
+			return null;
 		}
+	}
+
+	/**
+	 * Extract an IP address from a header value that has been obtained. Accepts single IP or comma separated string of
+	 * IPs
+	 *
+	 * @param string $headerValue The value from a trusted header
+	 * @return string The IP address
+	 */
+	protected function getIPFromHeaderValue($headerValue) {
+		if (strpos($headerValue, ',') !== false) {
+			//sometimes the IP from a load balancer could be "x.x.x.x, y.y.y.y, z.z.z.z" so we need to find the most
+			// likely candidate
+			$ips = explode(',', $headerValue);
+			foreach ($ips as $ip) {
+				$ip = trim($ip);
+				if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE)) {
+					return $ip;
+				}
+			}
+		}
+		return $headerValue;
 	}
 
 	/**

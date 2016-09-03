@@ -239,9 +239,22 @@ class SS_ConfigStaticManifest_Parser {
 		$depth = 0; $namespace = null; $class = null; $clsdepth = null; $access = 0;
 
 		while($token = $this->next()) {
-			$type = is_array($token) ? $token[0] : $token;
+			$type = ($token === (array)$token) ? $token[0] : $token;
 
 			if($type == T_CLASS) {
+				// Fetch the last token
+				$pos = $this->pos - 1; // Subtract 1 as the pointer is always 1 place ahead of the current token
+				do {
+					$pos--;
+					$prev = $this->tokens[$pos];
+				} while ($pos > 0 && is_array($prev) && $prev[0] == T_WHITESPACE);
+
+				// Ignore class keyword if it's being used for class name resolution: ClassName::class
+				$lastType = ($prev === (array)$prev) ? $prev[0] : $prev;
+				if ($lastType === T_PAAMAYIM_NEKUDOTAYIM) {
+					continue;
+				}
+
 				$next = $this->nextString();
 				if($next === null) {
 					user_error("Couldn\'t parse {$this->path} when building config static manifest", E_USER_ERROR);
@@ -302,7 +315,7 @@ class SS_ConfigStaticManifest_Parser {
 		$value = '';
 
 		while($token = $this->next()) {
-			$type = is_array($token) ? $token[0] : $token;
+			$type = ($token === (array)$token) ? $token[0] : $token;
 
 			if($type == T_PUBLIC || $type == T_PRIVATE || $type == T_PROTECTED) {
 				$access = $type;
@@ -328,8 +341,8 @@ class SS_ConfigStaticManifest_Parser {
 		if($token == '=') {
 			$depth = 0;
 
-			while($token = $this->next(false)){
-				$type = is_array($token) ? $token[0] : $token;
+			while($token = ($this->pos >= $this->length) ? null : $this->tokens[$this->pos++]) {
+				$type = ($token === (array)$token) ? $token[0] : $token;
 
 				// Track array nesting depth
 				if($type == T_ARRAY || $type == '[') {
@@ -351,7 +364,7 @@ class SS_ConfigStaticManifest_Parser {
 					$value .= $class;
 				}
 				else {
-					$value .= is_array($token) ? $token[1] : $token;
+					$value .= ($token === (array)$token) ? $token[1] : $token;
 				}
 			}
 		}

@@ -23,7 +23,6 @@ sl:
     FROMCOMPUTER: 'Izberite datoteke z vašega računalnika'
     FROMCOMPUTERINFO: 'Prenesite z vašega računalnika'
     TOTAL: Vse
-    TOUPLOAD: 'Izberite datoteke za prenos'
     UPLOADINPROGRESS: 'Prosimo, počakajte ... prenos poteka.'
     UPLOADOR: ALI
   BBCodeParser:
@@ -120,7 +119,6 @@ sl:
     INVALID_REQUEST: 'Napačna zahteva'
   DropdownField:
     CHOOSE: (Izberi)
-    CHOOSESEARCH: '(Izberi ali išči)'
   EmailField:
     VALIDATION: 'Prosim, vpišite e-naslov.'
   Enum:
@@ -142,15 +140,12 @@ sl:
     JsType: 'Javascript datoteka'
     Mp3Type: 'MP3 avdio datoteka'
     MpgType: 'MPEG video datoteka'
-    NOFILESIZE: 'Velikost datoteke je 0 bajtov.'
     NOVALIDUPLOAD: 'Datoteke ni možno naložiti.'
     Name: Ime
     PLURALNAME: Datoteke
     PdfType: 'Adobe Acrobat PDF datoteka'
     PngType: 'PNG slika - večstransko uporabna oblika'
     SINGULARNAME: Datoteka
-    TOOLARGE: 'Datoteka je prevelika. Največja dovoljena velikost je {size} '
-    TOOLARGESHORT: 'Velikost datoteke presega {size}'
     Title: Naslov
     WavType: 'WAV avdio datoteka'
     XlsType: 'Excel preglednica'
@@ -260,7 +255,6 @@ sl:
     IMAGETITLETEXT: 'Naslov (tooltip)'
     IMAGETITLETEXTDESC: 'Za dodatne informacije o sliki'
     IMAGEWIDTHPX: Širina
-    INSERTMEDIA: 'Vstavi multimedijsko datoteko'
     LINK: 'Povezava'
     LINKANCHOR: 'Sidro na tej strani'
     LINKDESCR: 'Opis povezave'
@@ -272,7 +266,6 @@ sl:
     LINKTO: 'Poveži na'
     PAGE: Stran
     URL: URL
-    UpdateMEDIA: 'Posodobi multimedijsko datoteko'
   Image:
     PLURALNAME: Datoteke
     SINGULARNAME: Datoteka
@@ -284,7 +277,6 @@ sl:
   LeftAndMain:
     CANT_REORGANISE: 'Nimate dovoljenja za menjavo strani v zgornjem nivoju. Sprememba ni shranjena.'
     DELETED: Izbrisano.
-    DropdownBatchActionsDefault: Dejanja
     HELP: Pomoč
     PERMAGAIN: 'Odjavili ste se iz CMS-vmesnika. Če se želite ponovno prijaviti, vpišite uporabniško ime in geslo.'
     PreviewButton: Predogled
@@ -328,13 +320,11 @@ sl:
     NoPassword: 'Za tega člana ni gesla'
     PASSWORD: Geslo
     PLURALNAME: Uporabniki
-    REMEMBERME: 'Zapomni si me do prihodnjič'
     SINGULARNAME: Uporabnik
     SUBJECTPASSWORDCHANGED: 'Geslo je bilo spremenjeno'
     SUBJECTPASSWORDRESET: 'Povezava za resetiranje vašega gesla'
     SURNAME: Priimek
     TIMEFORMAT: 'Format časovnega zapisa'
-    VALIDATIONMEMBEREXISTS: 'Uporabnik s tem %s že obstaja'
     WELCOMEBACK: 'Ponovno pozdravljeni, {firstname}'
     YOUROLDPASSWORD: 'Staro geslo'
     belongs_many_many_Groups: Skupine

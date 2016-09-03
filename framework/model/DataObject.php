@@ -1033,7 +1033,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 	 * Doesn't write to the database. Only sets fields as changed
 	 * if they are not already marked as changed.
 	 *
-	 * @return DataObject $this
+	 * @return $this
 	 */
 	public function forceChange() {
 		// Ensure lazy fields loaded
@@ -1042,7 +1042,8 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 		// $this->record might not contain the blank values so we loop on $this->inheritedDatabaseFields() as well
 		$fieldNames = array_unique(array_merge(
 			array_keys($this->record),
-			array_keys($this->inheritedDatabaseFields())));
+			array_keys($this->inheritedDatabaseFields())
+		));
 
 		foreach($fieldNames as $fieldName) {
 			if(!isset($this->changed[$fieldName])) $this->changed[$fieldName] = self::CHANGE_STRICT;
@@ -1078,7 +1079,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 
 	/**
 	 * Public accessor for {@see DataObject::validate()}
-	 * 
+	 *
 	 * @return ValidationResult
 	 */
 	public function doValidate() {
@@ -1227,22 +1228,16 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 	 * @param bool $forceChanges If set to true, force all fields to be treated as changed
 	 * @return bool True if any changes are detected
 	 */
-	protected function updateChanges($forceChanges = false) {
-		// Update the changed array with references to changed obj-fields
-		foreach($this->record as $field => $value) {
-			// Only mark ID as changed if $forceChanges
-			if($field === 'ID' && !$forceChanges) continue;
-			// Determine if this field should be forced, or can mark itself, changed
-			if($forceChanges
-				|| !$this->isInDB()
-				|| (is_object($value) && method_exists($value, 'isChanged') && $value->isChanged())
-			) {
-				$this->changed[$field] = self::CHANGE_VALUE;
+	protected function updateChanges($forceChanges = false)
+	{
+		if($forceChanges) {
+			// Force changes, but only for loaded fields
+			foreach($this->record as $field => $value) {
+				$this->changed[$field] = static::CHANGE_VALUE;
 			}
+			return true;
 		}
-
-		// Check changes exist, abort if there are no changes
-		return $this->changed && (bool)array_filter($this->changed);
+		return $this->isChanged();
 	}
 
 	/**
@@ -1378,7 +1373,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 		$isNewRecord = !$this->isInDB() || $forceInsert;
 
 		// Check changes exist, abort if there are none
-		$hasChanges = $this->updateChanges($forceInsert);
+		$hasChanges = $this->updateChanges($isNewRecord);
 		if($hasChanges || $forceWrite || $isNewRecord) {
 			// New records have their insert into the base data table done first, so that they can pass the
 			// generated primary key on to the rest of the manipulation
@@ -1606,7 +1601,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 		}
 
 		if($filter !== null || $sort !== null || $limit !== null) {
-			Deprecation::notice('4.0', 'The $filter, $sort and $limit parameters for DataObject::getComponents() 
+			Deprecation::notice('4.0', 'The $filter, $sort and $limit parameters for DataObject::getComponents()
 				have been deprecated. Please manipluate the returned list directly.', Deprecation::SCOPE_GLOBAL);
 		}
 
@@ -1694,7 +1689,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 			$remoteClass = $this->hasManyComponent($component, false);
 		} else {
 			$remoteClass = $this->belongsToComponent($component, false);
-		}		
+		}
 
 		if(empty($remoteClass)) {
 			throw new Exception("Unknown $type component '$component' on class '$this->class'");
@@ -1769,8 +1764,8 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 			= $this->manyManyComponent($componentName);
 
 		if($filter !== null || $sort !== null || $join !== null || $limit !== null) {
-			Deprecation::notice('4.0', 'The $filter, $sort, $join and $limit parameters for 
-				DataObject::getManyManyComponents() have been deprecated. 
+			Deprecation::notice('4.0', 'The $filter, $sort, $join and $limit parameters for
+				DataObject::getManyManyComponents() have been deprecated.
 				Please manipluate the returned list directly.', Deprecation::SCOPE_GLOBAL);
 		}
 
@@ -1785,9 +1780,15 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 
 		$extraFields = $this->manyManyExtraFieldsForComponent($componentName) ?: array();
 		$result = ManyManyList::create($componentClass, $table, $componentField, $parentField, $extraFields);
+
+
+		// Store component data in query meta-data
+		$result = $result->alterDataQuery(function($query) use ($extraFields) {
+			$query->setQueryParam('Component.ExtraFields', $extraFields);
+		});
 		
 		if($this->model) $result->setDataModel($this->model);
-		
+
 		$this->extend('updateManyManyComponents', $result);
 
 		// If this is called on a singleton, then we return an 'orphaned relation' that can have the
@@ -2037,7 +2038,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 		if($component) {
 			Deprecation::notice(
 				'4.0',
-				'Please use DataObject::manyManyExtraFieldsForComponent() instead of passing a component name 
+				'Please use DataObject::manyManyExtraFieldsForComponent() instead of passing a component name
 					to manyManyExtraFields()',
 				Deprecation::SCOPE_GLOBAL
 			);
@@ -2071,13 +2072,13 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 			}
 
 			// If we've not already found the relation name from dot notation, we need to find a relation that points
-			// back to this class. As there's no dot-notation, there can only be one relation pointing to this class, 
+			// back to this class. As there's no dot-notation, there can only be one relation pointing to this class,
 			// so it's safe to assume that it's the correct one
 			if(!$relationName) {
 				$candidateManyManys = (array)Config::inst()->get($candidate, 'many_many', Config::UNINHERITED);
 
 				foreach($candidateManyManys as $relation => $relatedClass) {
-					if($relatedClass === $this->class) {
+					if (is_a($this, $relatedClass)) {
 						$relationName = $relation;
 					}
 				}
@@ -2451,10 +2452,15 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 	/**
 	 * Loads all the stub fields that an initial lazy load didn't load fully.
 	 *
-	 * @param tableClass Base table to load the values from. Others are joined as required.
-	 *                   Not specifying a tableClass will load all lazy fields from all tables.
+	 * @param string $tableClass Base table to load the values from. Others are joined as required.
+	 * Not specifying a tableClass will load all lazy fields from all tables.
+	 * @return bool Flag if lazy loading succeeded
 	 */
 	protected function loadLazyFields($tableClass = null) {
+		if(!$this->isInDB() || !is_numeric($this->ID)) {
+			return false;
+		}
+
 		if (!$tableClass) {
 			$loaded = array();
 
@@ -2465,7 +2471,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 				}
 			}
 
-			return;
+			return false;
 		}
 
 		$dataQuery = new DataQuery($tableClass);
@@ -2474,9 +2480,6 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 		if($params = $this->getSourceQueryParams()) {
 			foreach($params as $key => $value) $dataQuery->setQueryParam($key, $value);
 		}
-
-		// TableField sets the record ID to "new" on new row data, so don't try doing anything in that case
-		if(!is_numeric($this->record['ID'])) return false;
 
 		// Limit query to the current record, unless it has the Versioned extension,
 		// in which case it requires special handling through augmentLoadLazyFields()
@@ -2522,6 +2525,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 				}
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -2554,11 +2558,15 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 		}
 
 		if($databaseFieldsOnly) {
-			$databaseFields = $this->inheritedDatabaseFields();
-			$databaseFields['ID'] = true;
-			$databaseFields['LastEdited'] = true;
-			$databaseFields['Created'] = true;
-			$databaseFields['ClassName'] = true;
+			// Merge all DB fields together
+			$inheritedFields = $this->inheritedDatabaseFields();
+			$compositeFields = static::composite_fields(get_class($this));
+			$fixedFields = $this->config()->fixed_fields;
+			$databaseFields = array_merge(
+				$inheritedFields,
+				$fixedFields,
+				$compositeFields
+			);
 			$fields = array_intersect_key((array)$this->changed, $databaseFields);
 		} else {
 			$fields = $this->changed;
@@ -2593,11 +2601,13 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 	 * @return boolean
 	 */
 	public function isChanged($fieldName = null, $changeLevel = self::CHANGE_STRICT) {
-		$changed = $this->getChangedFields(false, $changeLevel);
-		if(!isset($fieldName)) {
+		if (!$fieldName) {
+			// Limit "any changes" to db fields only
+			$changed = $this->getChangedFields(true, $changeLevel);
 			return !empty($changed);
-		}
-		else {
+		} else {
+			// Given a field name, check all fields
+			$changed = $this->getChangedFields(false, $changeLevel);
 			return array_key_exists($fieldName, $changed);
 		}
 	}
@@ -2681,6 +2691,28 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 			$this->$fieldName = $val;
 		}
 		return $this;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function castingHelper($field) {
+		if ($fieldSpec = $this->db($field)) {
+			return $fieldSpec;
+		}
+
+		// many_many_extraFields aren't presented by db(), so we check if the source query params
+		// provide us with meta-data for a many_many relation we can inspect for extra fields.
+		$queryParams = $this->getSourceQueryParams();
+		if (!empty($queryParams['Component.ExtraFields'])) {
+			$extraFields = $queryParams['Component.ExtraFields'];
+
+			if (isset($extraFields[$field])) {
+				return $extraFields[$field];
+			}
+		}
+
+		return parent::castingHelper($field);
 	}
 
 	/**
@@ -3564,7 +3596,7 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 				// Format: array('MyFieldName' => array(
 				//   'filter => 'ExactMatchFilter',
 				//   'field' => 'NumericField', // optional
-				//   'title' => 'My Title', // optiona.
+				//   'title' => 'My Title', // optional
 				// ))
 				$rewrite[$identifer] = array_merge(
 					array('filter' => $this->relObject($identifer)->stat('default_search_filter_class')),
@@ -3631,10 +3663,10 @@ class DataObject extends ViewableData implements DataObjectInterface, i18nEntity
 					'db'        => (array)Config::inst()->get($ancestorClass, 'db', Config::UNINHERITED)
 				);
 				if($includerelations){
-					$types['has_one'] = (array)singleton($ancestorClass)->uninherited('has_one', true);
-					$types['has_many'] = (array)singleton($ancestorClass)->uninherited('has_many', true);
-					$types['many_many'] = (array)singleton($ancestorClass)->uninherited('many_many', true);
-					$types['belongs_many_many'] = (array)singleton($ancestorClass)->uninherited('belongs_many_many', true);
+					$types['has_one'] = (array)Config::inst()->get($ancestorClass, 'has_one', Config::UNINHERITED);
+					$types['has_many'] = (array)Config::inst()->get($ancestorClass, 'has_many', Config::UNINHERITED);
+					$types['many_many'] = (array)Config::inst()->get($ancestorClass, 'many_many', Config::UNINHERITED);
+					$types['belongs_many_many'] = (array)Config::inst()->get($ancestorClass, 'belongs_many_many', Config::UNINHERITED);
 				}
 				foreach($types as $type => $attrs) {
 					foreach($attrs as $name => $spec) {

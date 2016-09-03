@@ -85,13 +85,10 @@ mi:
     DUPLICATEDWITHCHILDREN: 'I momoho te tārite i ''{title}'' me ngā tamariki'
     EMAIL: Īmēra
     EditTree: 'Whakatika Rākau'
-    ListFiltered: 'Rārangi kua tātaritia'
     MENUTITLE: 'Whakatika Whārangi'
     NEWPAGE: '{pagetype} hou'
     PAGENOTEXISTS: 'KIāore tēnei whārangi e tīari'
-    PAGES: Ngā Whārangi
     PAGETYPEANYOPT: Ko tētahi
-    PAGETYPEOPT: 'Momo wharangi '
     PUBALLCONFIRM: 'Whakaputaina koa i ia whārangi i te pae me te tārua i te content stage kia ora ai.'
     PUBALLFUN: 'Te taumahinga "Whakaputaina Katoatia"'
     PUBALLFUN2: "Ko te pēhi i tēnei pātene he taurite ki te haere ki ia whārangi me te pēhi i te \"whakaputaina\". Ko te tikanga, ka whakamahia tēnei pātene i muri ake i te mahi whakatikatika kua maha ngā tinihanga, pērā i te wā i hangaia tuatahi mai te pae. "
@@ -109,10 +106,7 @@ mi:
     TabContent: Ngā Ihirangi
     TabHistory: Hītori
     TabSettings: Ngā Tautuhinga
-    TreeFiltered: 'Rākau kua tātaritia'
-    TreeFilteredClear: 'Ūkui tātari'
   CMSMain_left_ss:
-    APPLY_FILTER: 'Hoatu Tātari'
     RESET: Tautuhi Anō
   CMSPageAddController:
     MENUTITLE: 'Tāpiri whārangi'
@@ -144,15 +138,12 @@ mi:
     ListView: 'Tirohanga Rārangi'
     MENUTITLE: Ngā Whārangi
     TreeView: 'Tirohanga Rākau'
-  CMSPagesController_ContentToolbar_ss:
-    MULTISELECT: Tīpakonga-maha
   CMSPagesController_Tools_ss:
     FILTER: Tātari
   CMSSearch:
     FILTERDATEFROM: Mai i
     FILTERDATEHEADING: Rā
     FILTERDATETO: Ki
-    FILTERLABELTEXT: Ngā Ihirangi
   CMSSettingsController:
     MENUTITLE: Ngā Tautuhinga
   CMSSiteTreeFilter_Search:
@@ -305,9 +296,7 @@ mi:
     BUTTONUNPUBLISHDESC: 'Tangohia tēnei whārangi i te pae kua whakaputaina'
     Comments: Ngā Tākupu
     Content: Ngā Ihirangi
-    DEFAULTABOUTCONTENT: '<p>Ka taea te whakakī i tēnei whārangi ki āu ake ihirangi, te muku rānei me te hanga i āu ake whārangi.<br /></p>'
     DEFAULTABOUTTITLE: 'Mō Mātou'
-    DEFAULTCONTACTCONTENT: '<p>Ka taea te whakakī i tēnei whārangi ki āu ake ihirangi, te muku rānei me te hanga i āu ake whārangi.<br /></p>'
     DEFAULTCONTACTTITLE: 'Whakapā Mai'
     DEFAULTHOMETITLE: Kāinga
     DELETEDPAGEHELP: 'Kua kore e whakaputaina te whārangi'

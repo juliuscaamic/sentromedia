@@ -150,7 +150,7 @@ class GridFieldSortableHeader implements GridField_HTMLProvider, GridField_DataM
 						&& $gridField->getConfig()->getComponentByType('GridFieldFilterHeader')){
 
 					$field = new LiteralField($fieldName,
-						'<button name="showFilter" class="ss-gridfield-button-filter trigger"></button>');
+						'<button type="button" name="showFilter" class="ss-gridfield-button-filter trigger"></button>');
 				} else {
 					$field = new LiteralField($fieldName, '<span class="non-sortable">' . $title . '</span>');
 				}
@@ -192,7 +192,7 @@ class GridFieldSortableHeader implements GridField_HTMLProvider, GridField_DataM
 	}
 
 	/**
-	 * Returns the manipulated (sorted) DataList. Field names will simply add an 
+	 * Returns the manipulated (sorted) DataList. Field names will simply add an
 	 * 'ORDER BY' clause, relation names will add appropriate joins to the
 	 * {@link DataQuery} first.
 	 *
@@ -225,7 +225,7 @@ class GridFieldSortableHeader implements GridField_HTMLProvider, GridField_DataM
 					$tmpItem = $tmpItem->$methodName();
 
 					$joinClass = ClassInfo::table_for_object_field(
-						$lastAlias, 
+						$lastAlias,
 						$methodName . "ID"
 					);
 

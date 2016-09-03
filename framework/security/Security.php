@@ -208,6 +208,7 @@ class Security extends Controller implements TemplateGlobalProvider {
 	 *
 	 * The alreadyLoggedIn value can contain a '%s' placeholder that will be replaced with a link
 	 * to log in.
+	 * @return SS_HTTPResponse
 	 */
 	public static function permissionFailure($controller = null, $messageSet = null) {
 		self::set_ignore_disallowed_actions(true);
@@ -226,86 +227,88 @@ class Security extends Controller implements TemplateGlobalProvider {
 				}
 			}
 			return $response;
-		} else {
-			// Prepare the messageSet provided
-			if(!$messageSet) {
-				if($configMessageSet = static::config()->get('default_message_set')) {
-					$messageSet = $configMessageSet;
-				} else {
-					$messageSet = array(
-						'default' => _t(
-							'Security.NOTEPAGESECURED',
-							"That page is secured. Enter your credentials below and we will send "
-								. "you right along."
-						),
-						'alreadyLoggedIn' => _t(
-							'Security.ALREADYLOGGEDIN',
-							"You don't have access to this page.  If you have another account that "
-								. "can access that page, you can log in again below.",
+		}
 
-							"%s will be replaced with a link to log in."
-						)
-					);
-				}
+		// Prepare the messageSet provided
+		if(!$messageSet) {
+			if($configMessageSet = static::config()->get('default_message_set')) {
+				$messageSet = $configMessageSet;
+			} else {
+				$messageSet = array(
+					'default' => _t(
+						'Security.NOTEPAGESECURED',
+						"That page is secured. Enter your credentials below and we will send "
+							. "you right along."
+					),
+					'alreadyLoggedIn' => _t(
+						'Security.ALREADYLOGGEDIN',
+						"You don't have access to this page.  If you have another account that "
+							. "can access that page, you can log in again below.",
+
+						"%s will be replaced with a link to log in."
+					)
+				);
 			}
+		}
 
-			if(!is_array($messageSet)) {
-				$messageSet = array('default' => $messageSet);
-			}
+		if(!is_array($messageSet)) {
+			$messageSet = array('default' => $messageSet);
+		}
 
-			$member = Member::currentUser();
+		$member = Member::currentUser();
 
-			// Work out the right message to show
-			if($member && $member->exists()) {
-				$response = ($controller) ? $controller->getResponse() : new SS_HTTPResponse();
-				$response->setStatusCode(403);
+		// Work out the right message to show
+		if($member && $member->exists()) {
+			$response = ($controller) ? $controller->getResponse() : new SS_HTTPResponse();
+			$response->setStatusCode(403);
 
-				//If 'alreadyLoggedIn' is not specified in the array, then use the default
-				//which should have been specified in the lines above
-				if(isset($messageSet['alreadyLoggedIn'])) {
-					$message = $messageSet['alreadyLoggedIn'];
-				} else {
-					$message = $messageSet['default'];
-				}
-
-				// Somewhat hackish way to render a login form with an error message.
-				$me = new Security();
-				$form = $me->LoginForm();
-				$form->sessionMessage($message, 'warning');
-				Session::set('MemberLoginForm.force_message',1);
-				$formText = $me->login();
-
-				$response->setBody($formText);
-
-				$controller->extend('permissionDenied', $member);
-
-				return $response;
+			//If 'alreadyLoggedIn' is not specified in the array, then use the default
+			//which should have been specified in the lines above
+			if(isset($messageSet['alreadyLoggedIn'])) {
+				$message = $messageSet['alreadyLoggedIn'];
 			} else {
 				$message = $messageSet['default'];
 			}
 
-			Session::set("Security.Message.message", $message);
-			Session::set("Security.Message.type", 'warning');
+			// Somewhat hackish way to render a login form with an error message.
+			$me = new Security();
+			$form = $me->LoginForm();
+			$form->sessionMessage($message, 'warning');
+			Session::set('MemberLoginForm.force_message',1);
+			$loginResponse = $me->login();
+			if($loginResponse instanceof SS_HTTPResponse) {
+				return $loginResponse;
+			}
 
-			Session::set("BackURL", $_SERVER['REQUEST_URI']);
+			$response->setBody((string)$loginResponse);
 
-			// TODO AccessLogEntry needs an extension to handle permission denied errors
-			// Audit logging hook
 			$controller->extend('permissionDenied', $member);
 
-			$controller->redirect(
-				Config::inst()->get('Security', 'login_url')
-				. "?BackURL=" . urlencode($_SERVER['REQUEST_URI'])
-			);
+			return $response;
+		} else {
+			$message = $messageSet['default'];
 		}
-		return;
+
+		Session::set("Security.Message.message", $message);
+		Session::set("Security.Message.type", 'warning');
+
+		Session::set("BackURL", $_SERVER['REQUEST_URI']);
+
+		// TODO AccessLogEntry needs an extension to handle permission denied errors
+		// Audit logging hook
+		$controller->extend('permissionDenied', $member);
+
+		return $controller->redirect(
+			Config::inst()->get('Security', 'login_url')
+			. "?BackURL=" . urlencode($_SERVER['REQUEST_URI'])
+		);
 	}
 
 	public function init() {
 		parent::init();
 
 		// Prevent clickjacking, see https://developer.mozilla.org/en-US/docs/HTTP/X-Frame-Options
-		$this->response->addHeader('X-Frame-Options', 'SAMEORIGIN');
+		$this->getResponse()->addHeader('X-Frame-Options', 'SAMEORIGIN');
 	}
 
 	public function index() {
@@ -324,10 +327,8 @@ class Security extends Controller implements TemplateGlobalProvider {
 			if(in_array($authenticator, $authenticators)) {
 				return $authenticator;
 			}
-		} else {
-			return Authenticator::get_default_authenticator();
 		}
-
+		return Authenticator::get_default_authenticator();
 	}
 
 	/**
@@ -391,7 +392,7 @@ class Security extends Controller implements TemplateGlobalProvider {
 		$member = Member::currentUser();
 		if($member) $member->logOut();
 
-		if($redirect && (!$this->response || !$this->response->isFinished())) {
+		if($redirect && (!$this->getResponse()->isFinished())) {
 			$this->redirectBack();
 		}
 	}
@@ -406,7 +407,7 @@ class Security extends Controller implements TemplateGlobalProvider {
 		// Event handler for pre-login, with an option to let it break you out of the login form
 		$eventResults = $this->extend('onBeforeSecurityLogin');
 		// If there was a redirection, return
-		if($this->redirectedTo()) return $this->response;
+		if($this->redirectedTo()) return $this->getResponse();
 		// If there was an SS_HTTPResponse object returned, then return that
 		if($eventResults) {
 			foreach($eventResults as $result) {
@@ -502,7 +503,7 @@ class Security extends Controller implements TemplateGlobalProvider {
 	 * For multiple authenticators, Security_MultiAuthenticatorLogin is used.
 	 * See getTemplatesFor and getIncludeTemplate for how to override template logic
 	 *
-	 * @return string Returns the "login" page as HTML code.
+	 * @return string|SS_HTTPResponse Returns the "login" page as HTML code.
 	 */
 	public function login() {
 		// Check pre-login process
@@ -528,13 +529,13 @@ class Security extends Controller implements TemplateGlobalProvider {
 		Session::clear('Security.Message');
 
 		// only display tabs when more than one authenticator is provided
-		// to save bandwidth and reduce the amount of custom styling needed 
+		// to save bandwidth and reduce the amount of custom styling needed
 		if(count($forms) > 1) {
 			$content = $this->generateLoginFormSet($forms);
 		} else {
 			$content = $forms[0]->forTemplate();
 		}
-		
+
 		// Finally, customise the controller to add any form messages and the form.
 		$customisedController = $controller->customise(array(
 			"Content" => $message,

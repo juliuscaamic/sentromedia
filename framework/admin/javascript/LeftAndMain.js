@@ -5,7 +5,41 @@ jQuery.noConflict();
  */
 (function($) {
 
+	window.ss = window.ss || {};
+
 	var windowWidth, windowHeight;
+
+	/**
+	 * @func debounce
+	 * @param func {function} - The callback to invoke after `wait` milliseconds.
+	 * @param wait {number} - Milliseconds to wait.
+	 * @param immediate {boolean} - If true the callback will be invoked at the start rather than the end.
+	 * @return {function}
+	 * @desc Returns a function that will not be called until it hasn't been invoked for `wait` seconds.
+	 */
+	window.ss.debounce = function (func, wait, immediate) {
+		var timeout, context, args;
+
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+
+		return function() {
+			var callNow = immediate && !timeout;
+
+			context = this;
+			args = arguments;
+
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+
+			if (callNow) {
+				func.apply(context, args);
+			}
+		};
+	};
+
 	$(window).bind('resize.leftandmain', function(e) {
 		// Entwine's 'fromWindow::onresize' does not trigger on IE8. Use synthetic event.
 		var cb = function() {$('.cms-container').trigger('windowresize');};
@@ -110,38 +144,7 @@ jQuery.noConflict();
 			);
 		};
 
-		/**
-		 * @func debounce
-		 * @param func {function} - The callback to invoke after `wait` milliseconds.
-		 * @param wait {number} - Milliseconds to wait.
-		 * @param immediate {boolean} - If true the callback will be invoked at the start rather than the end.
-		 * @return {function}
-		 * @desc Returns a function that will not be called until it hasn't been invoked for `wait` seconds.
-		 */
-		var debounce = function (func, wait, immediate) {
-			var timeout, context, args;
-
-			var later = function() {
-				timeout = null;
-				if (!immediate) func.apply(context, args);
-			};
-
-			return function() {
-				var callNow = immediate && !timeout;
-
-				context = this;
-				args = arguments;
-
-				clearTimeout(timeout);
-				timeout = setTimeout(later, wait);
-
-				if (callNow) {
-					func.apply(context, args);
-				}
-			};
-		};
-
-		var ajaxCompleteEvent = debounce(function (context) {
+		var ajaxCompleteEvent = window.ss.debounce(function () {
 			$(window).trigger('ajaxComplete');
 		}, 1000, true);
 
@@ -176,7 +179,7 @@ jQuery.noConflict();
 			var msg = (xhr.getResponseHeader('X-Status')) ? xhr.getResponseHeader('X-Status') : xhr.statusText,
 				reathenticate = xhr.getResponseHeader('X-Reauthenticate'),
 				msgType = (xhr.status < 200 || xhr.status > 399) ? 'bad' : 'good',
-				ignoredMessages = ['OK'];
+				ignoredMessages = ['OK', 'success', 'HTTP/2.0 200'];
 
 			// Enable reauthenticate dialog if requested
 			if(reathenticate) {
@@ -185,7 +188,7 @@ jQuery.noConflict();
 			}
 
 			// Show message (but ignore aborted requests)
-			if(xhr.status !== 0 && msg && $.inArray(msg, ignoredMessages)) {
+			if(xhr.status !== 0 && msg && $.inArray(msg, ignoredMessages) === -1) {
 				// Decode into UTF-8, HTTP headers don't allow multibyte
 				statusMessage(decodeURIComponent(msg), msgType);
 			}
@@ -359,7 +362,7 @@ jQuery.noConflict();
 				this.find('.cms-preview').redraw();
 				this.find('.cms-content').redraw();
 			},
-			
+
 			/**
 			 * Confirm whether the current user can navigate away from this page
 			 * 
@@ -513,7 +516,7 @@ jQuery.noConflict();
 
 				return false;
 			},
-			
+
 			/**
 			 * Last html5 history state
 			 */
@@ -911,8 +914,11 @@ jQuery.noConflict();
 					sessionStates = sessionData ? JSON.parse(sessionData) : false;
 
 				this.find('.cms-tabset, .ss-tabset').each(function() {
-					var index, tabset = $(this), tabsetId = tabset.attr('id'), tab,
-						forcedTab = tabset.find('.ss-tabs-force-active');
+					var index, 
+						tabset = $(this), 
+						tabsetId = tabset.attr('id'), 
+						tab,
+						forcedTab = tabset.children('ul').children('li.ss-tabs-force-active');
 
 					if(!tabset.data('tabs')){
 						return; // don't act on uninit'ed controls
@@ -921,18 +927,18 @@ jQuery.noConflict();
 					// The tabs may have changed, notify the widget that it should update its internal state.
 					tabset.tabs('refresh');
 
-					// Make sure the intended tab is selected.
+					// Make sure the intended tab is selected. Only force the tab on the correct tabset though
 					if(forcedTab.length) {
-						index = forcedTab.index();
+						index = forcedTab.first().index();
 					} else if(overrideStates && overrideStates[tabsetId]) {
 						tab = tabset.find(overrideStates[tabsetId].tabSelector);
 						if(tab.length){
 							index = tab.index();
 						}
 					} else if(sessionStates) {
-						$.each(sessionStates, function(i, sessionState) {
-							if(tabset.is('#' + sessionState.id)){
-								index = sessionState.selected;
+						$.each(sessionStates, function(i, state) {
+							if(tabsetId == state.id){
+								index = state.selected;
 							}
 						});
 					}
@@ -1348,7 +1354,7 @@ jQuery.noConflict();
 				form.find(".dropdown select").prop('selectedIndex', 0).trigger("liszt:updated"); // Reset chosen.js
 				form.submit();
 				}
-		})
+		});
 
 		/**
 		 * Allows to lazy load a panel, by leaving it empty
@@ -1444,6 +1450,8 @@ jQuery.noConflict();
 						}
 					}
 				});
+
+				this.trigger('afterredrawtabs');
 			},
 
 			/**
@@ -1459,15 +1467,55 @@ jQuery.noConflict();
 				});
 			}
 		});
+
+		/**
+		 * CMS content filters
+		 */
+		$('#filters-button').entwine({
+			onmatch: function () {
+				this._super();
+
+				this.data('collapsed', true); // The current collapsed state of the element.
+				this.data('animating', false); // True if the element is currently animating.
+			},
+			onunmatch: function () {
+				this._super();
+			},
+			showHide: function () {
+				var self = this,
+					$filters = $('.cms-content-filters').first(),
+					collapsed = this.data('collapsed');
+
+				// Prevent the user from spamming the UI with animation requests.
+				if (this.data('animating')) {
+					return;
+				}
+
+				this.toggleClass('active');
+				this.data('animating', true);
+
+				// Slide the element down / up based on it's current collapsed state.
+				$filters[collapsed ? 'slideDown' : 'slideUp']({
+					complete: function () {
+						// Update the element's state.
+						self.data('collapsed', !collapsed);
+						self.data('animating', false);
+					}
+				});
+			},
+			onclick: function () {
+				this.showHide();
+			}
+		});
 	});
 
 }(jQuery));
 
 var statusMessage = function(text, type) {
 	text = jQuery('<div/>').text(text).html(); // Escape HTML entities in text
-	jQuery.noticeAdd({text: text, type: type});
+	jQuery.noticeAdd({text: text, type: type, stayTime: 5000, inEffect: {left: '0', opacity: 'show'}});
 };
 
 var errorMessage = function(text) {
-	jQuery.noticeAdd({text: text, type: 'error'});
+	jQuery.noticeAdd({text: text, type: 'error', stayTime: 5000, inEffect: {left: '0', opacity: 'show'}});
 };

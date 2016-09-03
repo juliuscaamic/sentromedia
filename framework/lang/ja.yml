@@ -24,7 +24,6 @@ ja:
     FROMCOMPUTER: 'お使いのコンピュータからファイルを選択してください'
     FROMCOMPUTERINFO: 'コンピュータからアップロード'
     TOTAL: 合計
-    TOUPLOAD: 'アップロードするファイルを選択する'
     UPLOADINPROGRESS: 'しばらくお待ちください...アップロードは進行中です'
     UPLOADOR: もしくは
   BBCodeParser:
@@ -143,15 +142,12 @@ ja:
     JsType: 'Javascriptのファイル'
     Mp3Type: 'MP3 オーディオファイル'
     MpgType: 'MPEG ビデオファイル'
-    NOFILESIZE: 'ファイルサイズが0バイトです。'
     NOVALIDUPLOAD: 'ファイルが有効なアップロードではありません'
     Name: 名前
     PLURALNAME: ファイル
     PdfType: 'Adobe AcrobatのPDFファイル'
     PngType: 'PNG イメージ - 最適な汎用形式'
     SINGULARNAME: ファイル
-    TOOLARGE: 'ファイルサイズが大きすぎます。許可されている最大サイズは{size}です。'
-    TOOLARGESHORT: '{size}をファイルサイズは超えました'
     TiffType: 'タグ付けされたイメージ形式'
     Title: タイトル
     WavType: 'WAV オーディオファイル'
@@ -267,7 +263,6 @@ ja:
     IMAGETITLETEXT: 'タイトルテキスト(ツールチップ)'
     IMAGETITLETEXTDESC: '画像に関する追加情報'
     IMAGEWIDTHPX: 幅
-    INSERTMEDIA: 'メディアを追加'
     LINK: 'ハイライトテキストへのリンクの挿入/削除'
     LINKANCHOR: 'このページにアンカーを置く'
     LINKDESCR: 'リンクの説明'
@@ -280,7 +275,6 @@ ja:
     PAGE: ページ
     URL: URL
     URLNOTANOEMBEDRESOURCE: 'URL''{url}''はメディアリソースとして扱うことができませんでした。'
-    UpdateMEDIA: 'メディアを更新'
   Image:
     PLURALNAME: ファイル
     SINGULARNAME: ファイル
@@ -292,7 +286,6 @@ ja:
   LeftAndMain:
     CANT_REORGANISE: '最上層のページを変更する権限がありません。あなたの変更は保存されませんでした。'
     DELETED: 削除しました。
-    DropdownBatchActionsDefault: アクション
     HELP: ヘルプ
     PERMAGAIN: 'ログアウトしました。再度ログインする場合は下にユーザー名とパスワードを入力してください。'
     PreviewButton: プレビュー
@@ -337,13 +330,11 @@ ja:
     NoPassword: 'このメンバーにはパスワードはありません。'
     PASSWORD: パスワード
     PLURALNAME: メンバー
-    REMEMBERME: 'パスワードを記憶？'
     SINGULARNAME: メンバー
     SUBJECTPASSWORDCHANGED: 'パスワードが変わりました。'
     SUBJECTPASSWORDRESET: 'パスワード再発行'
     SURNAME: 姓
     TIMEFORMAT: '時間の形式'
-    VALIDATIONMEMBEREXISTS: '入力したメールアドレス（%s）は、他のメンバーにすでに使用されています。'
     ValidationIdentifierFailed: '同一の識別名 ({name} = {value})) を持つ既存のメンバー #{id} を上書きすることはできません'
     WELCOMEBACK: '{firstname}さん、おかえりなさい'
     YOUROLDPASSWORD: '古いパスワード'

@@ -129,7 +129,7 @@ class File extends DataObject {
 		'','ace','arc','arj','asf','au','avi','bmp','bz2','cab','cda','css','csv','dmg','doc','docx','dotx','dotm',
 		'flv','gif','gpx','gz','hqx','ico','jar','jpeg','jpg','js','kml', 'm4a','m4v',
 		'mid','midi','mkv','mov','mp3','mp4','mpa','mpeg','mpg','ogg','ogv','pages','pcx','pdf','pkg',
-		'png','pps','ppt','pptx','potx','potm','ra','ram','rm','rtf','sit','sitx','tar','tgz','tif','tiff',
+		'png','pps','ppt','pptx','potx','potm','ra','ram','rm','rtf','sit','sitx', 'svg', 'tar','tgz','tif','tiff',
 		'txt','wav','webm','wma','wmv','xls','xlsx','xltx','xltm','zip','zipx',
 	);
 
@@ -238,7 +238,7 @@ class File extends DataObject {
 	 */
 	public static function find($filename) {
 		// Get the base file if $filename points to a resampled file
-		$filename = preg_replace('/_resampled\/[^-]+-/', '', $filename);
+		$filename = Image::strip_resampled_prefix($filename);
 
 		// Split to folders and the actual filename, and traverse the structure.
 		$parts = explode("/", $filename);
@@ -468,6 +468,15 @@ class File extends DataObject {
 		return self::get_app_category($this->getExtension());
 	}
 
+	/**
+	 * Return image markup for use as a thumbnail in a strip
+	 *
+	 * @return HTMLVarchar
+	 */
+	public function StripThumbnail() {
+		return DBField::create_field('HTMLVarchar', '<img src="'.$this->Icon().'"/>');
+	}
+
 	public function CMSThumbnail() {
 		return '<img src="' . $this->Icon() . '" />';
 	}
@@ -481,15 +490,15 @@ class File extends DataObject {
 	 */
 	public function Icon() {
 		$ext = strtolower($this->getExtension());
-		if(!Director::fileExists(FRAMEWORK_DIR . "/images/app_icons/{$ext}_32.gif")) {
+		if(!Director::fileExists(FRAMEWORK_DIR . "/images/app_icons/{$ext}_32.png")) {
 			$ext = $this->appCategory();
 		}
 
-		if(!Director::fileExists(FRAMEWORK_DIR . "/images/app_icons/{$ext}_32.gif")) {
+		if(!Director::fileExists(FRAMEWORK_DIR . "/images/app_icons/{$ext}_32.png")) {
 			$ext = "generic";
 		}
 
-		return FRAMEWORK_DIR . "/images/app_icons/{$ext}_32.gif";
+		return FRAMEWORK_DIR . "/images/app_icons/{$ext}_32.png";
 	}
 
 	/**
@@ -743,7 +752,9 @@ class File extends DataObject {
 		if($this->ParentID) {
 			// Don't use the cache, the parent has just been changed
 			$p = DataObject::get_by_id('Folder', $this->ParentID, false);
-			if($p && $p->exists()) return $p->getRelativePath() . $this->getField("Name");
+			if($p && $p->isInDB()) {
+				return $p->getRelativePath() . $this->getField("Name");
+			}
 			else return ASSETS_DIR . "/" . $this->getField("Name");
 		} else if($this->getField("Name")) {
 			return ASSETS_DIR . "/" . $this->getField("Name");

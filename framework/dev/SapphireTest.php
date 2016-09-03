@@ -222,23 +222,13 @@ class SapphireTest extends PHPUnit_Framework_TestCase {
 
 		$prefix = defined('SS_DATABASE_PREFIX') ? SS_DATABASE_PREFIX : 'ss_';
 
-		// Set up email
-		$this->originalMailer = Email::mailer();
-		$this->mailer = new TestMailer();
-		Injector::inst()->registerService($this->mailer, 'Mailer');
-		Config::inst()->remove('Email', 'send_all_emails_to');
-
 		// Todo: this could be a special test model
 		$this->model = DataModel::inst();
 
 		// Set up fixture
-		if($fixtureFile || $this->usesDatabase || !self::using_temp_db()) {
-			if(substr(DB::get_conn()->getSelectedDatabase(), 0, strlen($prefix) + 5) 
-					!= strtolower(sprintf('%stmpdb', $prefix))) {
-
-				//echo "Re-creating temp database... ";
+		if($fixtureFile || $this->usesDatabase) {
+			if (!self::using_temp_db()) {
 				self::create_temp_db();
-				//echo "done.\n";
 			}
 
 			singleton('DataObject')->flushCache();
@@ -288,6 +278,12 @@ class SapphireTest extends PHPUnit_Framework_TestCase {
 
 		// Clear requirements
 		Requirements::clear();
+
+		// Set up email
+		$this->originalMailer = Email::mailer();
+		$this->mailer = new TestMailer();
+		Injector::inst()->registerService($this->mailer, 'Mailer');
+		Config::inst()->remove('Email', 'send_all_emails_to');
 	}
 
 	/**

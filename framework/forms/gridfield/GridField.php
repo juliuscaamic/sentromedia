@@ -149,7 +149,7 @@ class GridField extends FormField {
 			return $this->modelClassName;
 		}
 
-		if($this->list && method_exists($this->list, 'dataClass')) {
+		if($this->list && $this->list->hasMethod('dataClass')) {
 			$class = $this->list->dataClass();
 
 			if($class) {
@@ -501,11 +501,14 @@ class GridField extends FormField {
 			$header . "\n" . $footer . "\n" . $body
 		);
 
-		return DBField::create_field('HTMLText', FormField::create_tag(
+		$field = DBField::create_field('HTMLText', FormField::create_tag(
 			'fieldset',
 			$fieldsetAttributes,
 			$content['before'] . $table . $content['after']
 		));
+		$field->setOptions(array('shortcodes' => false));
+
+		return $field;
 	}
 
 	/**
@@ -582,6 +585,8 @@ class GridField extends FormField {
 		} else {
 			$classes[] = 'odd';
 		}
+		
+		$this->extend('updateNewRowClasses', $classes, $total, $index, $record);
 
 		return $classes;
 	}
@@ -592,6 +597,7 @@ class GridField extends FormField {
 	 * @return HTMLText
 	 */
 	public function Field($properties = array()) {
+		$this->extend('onBeforeRender', $this);
 		return $this->FieldHolder($properties);
 	}
 
@@ -833,6 +839,18 @@ class GridField extends FormField {
 	 */
 	public function gridFieldAlterAction($data, $form, SS_HTTPRequest $request) {
 		$data = $request->requestVars();
+
+		// Protection against CSRF attacks
+		$token = $this
+			->getForm()
+			->getSecurityToken();
+		if(!$token->checkRequest($request)) {
+			$this->httpError(400, _t("Form.CSRF_FAILED_MESSAGE",
+				"There seems to have been a technical problem. Please click the back button, ".
+				"refresh your browser, and try again."
+			));
+		}
+
 		$name = $this->getName();
 
 		$fieldData = null;

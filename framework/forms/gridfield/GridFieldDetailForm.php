@@ -385,26 +385,36 @@ class GridFieldDetailForm_ItemRequest extends RequestHandler {
 				$actions->push(new LiteralField('cancelbutton', $text));
 			}
 		}
+		
+		// If we are creating a new record in a has-many list, then
+		// pre-populate the record's foreign key.
+		if($list instanceof HasManyList && !$this->record->isInDB()) {
+			$key = $list->getForeignKey();
+			$id = $list->getForeignID();
+			$this->record->$key = $id;
+		}
 
 		$fields = $this->component->getFields();
 		if(!$fields) $fields = $this->record->getCMSFields();
 
 		// If we are creating a new record in a has-many list, then
-		// pre-populate the record's foreign key. Also disable the form field as
-		// it has no effect.
+		// Disable the form field as it has no effect.
 		if($list instanceof HasManyList) {
 			$key = $list->getForeignKey();
-			$id = $list->getForeignID();
-
-			if(!$this->record->isInDB()) {
-				$this->record->$key = $id;
-			}
 
 			if($field = $fields->dataFieldByName($key)) {
 				$fields->makeFieldReadonly($field);
 			}
 		}
 
+		// this pushes the current page ID in as a hidden field
+		// this means the request will have the current page ID in it
+		// rather than relying on session which can have been rewritten
+		// by the user having another tab open
+		// see LeftAndMain::currentPageID
+		if($this->controller->hasMethod('currentPageID') && $this->controller->currentPageID()) {
+			$fields->push(new HiddenField('CMSMainCurrentPageID', null, $this->controller->currentPageID()));
+		}
 		// Caution: API violation. Form expects a Controller, but we are giving it a RequestHandler instead.
 		// Thanks to this however, we are able to nest GridFields, and also access the initial Controller by
 		// dereferencing GridFieldDetailForm_ItemRequest->getController() multiple times. See getToplevelController
@@ -495,14 +505,14 @@ class GridFieldDetailForm_ItemRequest extends RequestHandler {
 
 		return $backlink;
 	}
-	
+
 	/**
 	 * Get the list of extra data from the $record as saved into it by
 	 * {@see Form::saveInto()}
-	 * 
+	 *
 	 * Handles detection of falsey values explicitly saved into the
 	 * DataObject by formfields
-	 * 
+	 *
 	 * @param DataObject $record
 	 * @param SS_List $list
 	 * @return array List of data to write to the relation
@@ -512,7 +522,7 @@ class GridFieldDetailForm_ItemRequest extends RequestHandler {
 		if(!($list instanceof ManyManyList)) {
 			return null;
 		}
-		
+
 		$data = array();
 		foreach($list->getExtraFields() as $field => $dbSpec) {
 			$savedField = "ManyMany[{$field}]";
@@ -549,24 +559,24 @@ class GridFieldDetailForm_ItemRequest extends RequestHandler {
 			$list->add($this->record, $extraData);
 		} catch(ValidationException $e) {
 			$form->sessionMessage($e->getResult()->message(), 'bad', false);
-			$responseNegotiator = new PjaxResponseNegotiator(array(
-				'CurrentForm' => function() use(&$form) {
-					return $form->forTemplate();
-				},
-				'default' => function() use(&$controller) {
-					return $controller->redirectBack();
-				}
-			));
-			if($controller->getRequest()->isAjax()){
+			if ($controller->getRequest()->isAjax()) {
+				$responseNegotiator = new PjaxResponseNegotiator(array(
+					'CurrentForm' => function () use (&$form) {
+						return $form->forTemplate();
+					},
+				));
 				$controller->getRequest()->addHeader('X-Pjax', 'CurrentForm');
+				return $responseNegotiator->respond($controller->getRequest());
 			}
-			return $responseNegotiator->respond($controller->getRequest());
+			Session::set("FormInfo.{$form->FormName()}.errors", array());
+			Session::set("FormInfo.{$form->FormName()}.data", $form->getData());
+			return $controller->redirectBack();
 		}
 
 		// TODO Save this item into the given relationship
 
-		$link = '<a href="' . $this->Link('edit') . '">"' 
-			. htmlspecialchars($this->record->Title, ENT_QUOTES) 
+		$link = '<a href="' . $this->Link('edit') . '">"'
+			. htmlspecialchars($this->record->Title, ENT_QUOTES)
 			. '"</a>';
 		$message = _t(
 			'GridFieldDetailForm.Saved',
@@ -596,6 +606,7 @@ class GridFieldDetailForm_ItemRequest extends RequestHandler {
 
 	public function doDelete($data, $form) {
 		$title = $this->record->Title;
+		$backLink = $this->getBacklink();
 		try {
 			if (!$this->record->canDelete()) {
 				throw new ValidationException(
@@ -626,7 +637,7 @@ class GridFieldDetailForm_ItemRequest extends RequestHandler {
 		$controller = $this->getToplevelController();
 		$controller->getRequest()->addHeader('X-Pjax', 'Content'); // Force a content refresh
 
-		return $controller->redirect($this->getBacklink(), 302); //redirect back to admin section
+		return $controller->redirect($backLink, 302); //redirect back to admin section
 	}
 
 	/**
@@ -678,8 +689,9 @@ class GridFieldDetailForm_ItemRequest extends RequestHandler {
 
 		$items = $this->popupController->Breadcrumbs($unlinked);
 		if($this->record && $this->record->ID) {
+			$title = ($this->record->Title) ? $this->record->Title : "#{$this->record->ID}";
 			$items->push(new ArrayData(array(
-				'Title' => $this->record->Title,
+				'Title' => $title,
 				'Link' => $this->Link()
 			)));
 		} else {

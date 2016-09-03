@@ -165,6 +165,7 @@ class Folder extends File {
 
 				// Check allowed extensions, unless admin users are allowed to bypass these exclusions
 				if($checkExtensions
+					&& !is_dir($baseDir . $actualChild)
 					&& ($extension = self::get_file_extension($actualChild))
 					&& !in_array(strtolower($extension), $allowedExtensions)
 				) {
@@ -357,6 +358,15 @@ class Folder extends File {
 		}
 
 		parent::onBeforeDelete();
+	}
+
+	/**
+	 * Return the relative URL of an icon for this file type
+	 *
+	 * @return String
+	 */
+	public function Icon() {
+		return FRAMEWORK_DIR . "/images/app_icons/folder_32.png";
 	}
 
 	/** Override setting the Title of Folders to that Name, Filename and Title are always in sync.

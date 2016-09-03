@@ -3,7 +3,7 @@
 /**
  * Used to edit the SiteTree->URLSegment property, and suggest input based on the serverside rules
  * defined through {@link SiteTree->generateURLSegment()} and {@link URLSegmentFilter}.
- * 
+ *
  * Note: The actual conversion for saving the value takes place in the model layer.
  *
  * @package cms
@@ -12,8 +12,8 @@
 
 class SiteTreeURLSegmentField extends TextField {
 	
-	/** 
-	 * @var string 
+	/**
+	 * @var string
 	 */
 	protected $helpText, $urlPrefix, $urlSuffix, $defaultUrl;
 	
@@ -133,4 +133,27 @@ class SiteTreeURLSegmentField extends TextField {
 		return Controller::join_links($this->getURLPrefix(), $this->Value(), $this->getURLSuffix());
 	}
 
+	public function performReadonlyTransformation() {
+		$newInst = parent::performReadonlyTransformation();
+		$newInst->helpText = $this->helpText;
+		$newInst->urlPrefix = $this->urlPrefix;
+		$newInst->urlSuffix = $this->urlSuffix;
+		$newInst->defaultUrl = $this->defaultUrl;
+		return $newInst;
+	}
+}
+
+
+/**
+ * Readonly version of a site tree URL segment field
+ *
+ * @package forms
+ * @subpackage fields-basic
+ */
+class SiteTreeURLSegmentField_Readonly extends SiteTreeURLSegmentField {
+	protected $readonly = true;
+
+	public function performReadonlyTransformation() {
+		return clone $this;
+	}
 }

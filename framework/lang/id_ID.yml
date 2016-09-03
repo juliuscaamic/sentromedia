@@ -1,5 +1,12 @@
 id_ID:
+  AddToCampaign:
+    ErrorCampaignPermissionDenied: 'Sepertinya Anda tidak memiliki ijin yang diperlukan untuk menambahkan {ObjectTitle} ke {CampaignTitle}'
+    ErrorGeneral: 'Mohon maaf, ada kesalahan'
+    ErrorNotFound: '{Type} tidak ditemukan'
+    Success: 'Berhasil menambahkan {ObjectTitle} ke {CampaignTitle}'
   AssetAdmin:
+    ALLOWEDEXTS: 'Ekstensi berkas yang diperbolehkan'
+    HIDEALLOWEDEXTS: 'Sembunyikan ekstensi berkas yang diperbolehkan'
     NEWFOLDER: FolderBaru
     SHOWALLOWEDEXTS: 'Tampilkan ekstensi yang dibolehkan'
   AssetTableField:
@@ -13,6 +20,7 @@ id_ID:
     TITLE: Judul
     TYPE: 'Jenis berkas'
     URL: URL
+    WIDTH: Lebar
   AssetUploadField:
     ChooseFiles: 'Pilih berkas'
     DRAGFILESHERE: 'Tarik berkas ke sini'
@@ -24,7 +32,6 @@ id_ID:
     FROMCOMPUTER: 'Pilih berkas dari komputer Anda'
     FROMCOMPUTERINFO: 'Unggah dari komputer Anda'
     TOTAL: Total
-    TOUPLOAD: 'Pilih berkas untuk diunggah...'
     UPLOADINPROGRESS: 'Mohon tunggu... sedang mengunggah'
     UPLOADOR: ATAU
   BBCodeParser:
@@ -144,7 +151,6 @@ id_ID:
     INVALID_REQUEST: 'Permintaan tidak valid'
   DropdownField:
     CHOOSE: (Pilih)
-    CHOOSESEARCH: '(Pilih atau Cari)'
     SOURCE_VALIDATION: 'Mohon pilih nilai dari daftar yang ada. ''{value}'' bukan pilihan valid'
   EmailField:
     VALIDATION: 'Mohon isikan alamat email'
@@ -168,15 +174,12 @@ id_ID:
     JsType: 'Berkas Javascript'
     Mp3Type: 'Berkas audio MP3'
     MpgType: 'Berkas video MPEG'
-    NOFILESIZE: 'Ukuran berkas nol byte.'
     NOVALIDUPLOAD: 'Berkas tidak diunggah dengan benar'
     Name: Nama
     PLURALNAME: Berkas
     PdfType: 'Berkas PDF Adobe Acrobat'
     PngType: 'Gambar PNG - bagus untuk format serba-bisa'
     SINGULARNAME: Berkas
-    TOOLARGE: 'Ukuran berkas terlalu besar, maksimal {size} dibolehkan'
-    TOOLARGESHORT: 'Ukuran berkas melebihi {size}'
     TiffType: 'Format gambar tertanda'
     Title: Judul
     WavType: 'Berkas audio WAV'
@@ -297,7 +300,6 @@ id_ID:
     IMAGETITLETEXT: 'Teks gambar (tooltip)'
     IMAGETITLETEXTDESC: 'Untuk informasi tambahan tentang gambar'
     IMAGEWIDTHPX: Lebar
-    INSERTMEDIA: 'Sisipkan Media'
     LINK: 'Sisipkan Tautan'
     LINKANCHOR: 'Jangkar pada laman ini'
     LINKDESCR: 'Deskripsi tautan'
@@ -311,7 +313,6 @@ id_ID:
     SUBJECT: 'Subyek email'
     URL: URL
     URLNOTANOEMBEDRESOURCE: 'URL ''{url}'' tidak dapat dijadikan sumber daya media.'
-    UpdateMEDIA: 'Perbarui Media'
   Image:
     PLURALNAME: Berkas
     SINGULARNAME: Berkas
@@ -323,7 +324,6 @@ id_ID:
   LeftAndMain:
     CANT_REORGANISE: 'Anda tidak diijinkan mengubah laman Tingkat Atas. Pengubahan Anda tidak tersimpan.'
     DELETED: Terhapus.
-    DropdownBatchActionsDefault: Tindakan
     HELP: Bantuan
     PERMAGAIN: 'Anda telah keluar dari situs. Jika ingin kembali masuk, isikan nama pengguna dan kata kunci di bawah ini.'
     PreviewButton: Pratinjau
@@ -369,13 +369,11 @@ id_ID:
     PASSWORD: Kata kunci
     PASSWORDEXPIRED: 'Kata kunci Anda telah kadaluarsa. Mohon buat yang baru.'
     PLURALNAME: Pengguna
-    REMEMBERME: 'Ingat akun saya?'
     SINGULARNAME: Pengguna
     SUBJECTPASSWORDCHANGED: 'Kata kunci Anda telah diganti'
     SUBJECTPASSWORDRESET: 'Tautan penggantian kata kunci Anda'
     SURNAME: Nama Belakang
     TIMEFORMAT: 'Format waktu'
-    VALIDATIONMEMBEREXISTS: 'Pengguna dengan %s yang sama sudah ada'
     ValidationIdentifierFailed: 'Tidak dapat menimpa pengguna #{id} dengan pengenal yang sama ({name} = {value}))'
     WELCOMEBACK: 'Selamat Datang kembali, {firstname}'
     YOUROLDPASSWORD: 'Kata kunci lama'
@@ -574,3 +572,6 @@ id_ID:
     UPLOADSINTO: 'disimpan ke /{path}'
   Versioned:
     has_many_Versions: Versi
+  VersionedGridFieldItemRequest:
+    ARCHIVE: Arsip
+    Archived: '%s %s diarsipkan'

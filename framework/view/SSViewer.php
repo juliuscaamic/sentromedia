@@ -5,16 +5,16 @@
  *   - Handle entering & leaving sub-scopes in loops and withs
  *   - Track Up and Top
  *   - (As a side effect) Inject data that needs to be available globally (used to live in ViewableData)
- * 
+ *
  * In order to handle up, rather than tracking it using a tree, which would involve constructing new objects
  * for each step, we use indexes into the itemStack (which already has to exist).
- * 
+ *
  * Each item has three indexes associated with it
- * 
+ *
  *   - Pop. Which item should become the scope once the current scope is popped out of
  *   - Up. Which item is up from this item
  *   - Current. Which item is the first time this object has appeared in the stack
- * 
+ *
  * We also keep the index of the current starting point for lookups. A lookup is a sequence of obj calls -
  * when in a loop or with tag the end result becomes the new scope, but for injections, we throw away the lookup
  * and revert back to the original scope once we've got the value we're after
@@ -23,20 +23,28 @@
  * @subpackage view
  */
 class SSViewer_Scope {
+
+	const ITEM = 0;
+	const ITEM_ITERATOR = 1;
+	const ITEM_ITERATOR_TOTAL = 2;
+	const POP_INDEX = 3;
+	const UP_INDEX = 4;
+	const CURRENT_INDEX = 5;
+	const ITEM_OVERLAY = 6;
 	
 	// The stack of previous "global" items
-	// And array of item, itemIterator, itemIteratorTotal, pop_index, up_index, current_index
+	// An indexed array of item, item iterator, item iterator total, pop index, up index, current index & parent overlay
 	private $itemStack = array(); 
-	
+
 	// The current "global" item (the one any lookup starts from)
-	protected $item; 
+	protected $item;
 
 	// If we're looping over the current "global" item, here's the iterator that tracks with item we're up to
-	protected $itemIterator; 
+	protected $itemIterator;
 
 	//Total number of items in the iterator
 	protected $itemIteratorTotal;
-	
+
 	// A pointer into the item stack for which item should be scope on the next pop call
 	private $popIndex;
 
@@ -45,7 +53,7 @@ class SSViewer_Scope {
 
 	// A pointer into the item stack for which item is this one (or null if not in stack yet)
 	private $currentIndex = null;
-	
+
 	private $localIndex;
 
 	public function __construct($item, $inheritedScope = null) {
@@ -60,7 +68,7 @@ class SSViewer_Scope {
 			$this->itemStack[] = array($this->item, null, 0, null, null, 0);
 		}
 	}
-	
+
 	public function getItem(){
 		return $this->itemIterator ? $this->itemIterator->current() : $this->item;
 	}
@@ -101,12 +109,12 @@ class SSViewer_Scope {
 				list($this->item, $this->itemIterator, $this->itemIteratorTotal, $unused2, $this->upIndex,
 					$this->currentIndex) = $this->itemStack[$this->upIndex];
 				break;
-			
+
 			case 'Top':
 				list($this->item, $this->itemIterator, $this->itemIteratorTotal, $unused2, $this->upIndex,
 					$this->currentIndex) = $this->itemStack[0];
 				break;
-			
+
 			default:
 				$this->item = $this->getObj($name, $arguments, $forceReturnedObject, $cache, $cacheName);
 				$this->itemIterator = null;
@@ -134,52 +142,73 @@ class SSViewer_Scope {
 
 	public function pushScope(){
 		$newLocalIndex = count($this->itemStack)-1;
-		
-		$this->popIndex = $this->itemStack[$newLocalIndex][3] = $this->localIndex;
+
+		$this->popIndex = $this->itemStack[$newLocalIndex][SSViewer_Scope::POP_INDEX] = $this->localIndex;
 		$this->localIndex = $newLocalIndex;
-		
+
 		// We normally keep any previous itemIterator around, so local $Up calls reference the right element. But
 		// once we enter a new global scope, we need to make sure we use a new one
-		$this->itemIterator = $this->itemStack[$newLocalIndex][1] = null;
-		
+		$this->itemIterator = $this->itemStack[$newLocalIndex][SSViewer_Scope::ITEM_ITERATOR] = null;
+
 		return $this;
 	}
 
 	public function popScope(){
 		$this->localIndex = $this->popIndex;
 		$this->resetLocalScope();
-		
+
 		return $this;
 	}
-	
+
 	public function next(){
 		if (!$this->item) return false;
-		
+
 		if (!$this->itemIterator) {
 			if (is_array($this->item)) $this->itemIterator = new ArrayIterator($this->item);
 			else $this->itemIterator = $this->item->getIterator();
-			
-			$this->itemStack[$this->localIndex][1] = $this->itemIterator;
+
+			$this->itemStack[$this->localIndex][SSViewer_Scope::ITEM_ITERATOR] = $this->itemIterator;
 			$this->itemIteratorTotal = iterator_count($this->itemIterator); //count the total number of items
-			$this->itemStack[$this->localIndex][2] = $this->itemIteratorTotal;
+			$this->itemStack[$this->localIndex][SSViewer_Scope::ITEM_ITERATOR_TOTAL] = $this->itemIteratorTotal;
 			$this->itemIterator->rewind();
 		}
 		else {
 			$this->itemIterator->next();
 		}
-		
+
 		$this->resetLocalScope();
 
 		if (!$this->itemIterator->valid()) return false;
 		return $this->itemIterator->key();
 	}
-	
+
 	public function __call($name, $arguments) {
 		$on = $this->itemIterator ? $this->itemIterator->current() : $this->item;
 		$retval = $on ? call_user_func_array(array($on, $name), $arguments) : null;
-		
+
 		$this->resetLocalScope();
 		return $retval;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function getItemStack() {
+		return $this->itemStack;
+	}
+
+	/**
+	 * @param array
+	 */
+	protected function setItemStack(array $stack) {
+		$this->itemStack = $stack;
+	}
+
+	/**
+	 * @return int|null
+	 */
+	protected function getUpIndex() {
+		return $this->upIndex;
 	}
 }
 
@@ -346,7 +375,7 @@ class SSViewer_BasicIteratorSupport implements TemplateIteratorProvider {
 
 	/**
 	 * Returns true or false depending on if the pos of the iterator is a multiple of a specific number.
-	 * So, <% if MultipleOf(3) %> would return true on indexes: 3,6,9,12,15, etc. 
+	 * So, <% if MultipleOf(3) %> would return true on indexes: 3,6,9,12,15, etc.
 	 * The count starts from $offset, which defaults to 1.
 	 * @param int $factor The multiple of which to return
 	 * @param int $offset Number to start count from.
@@ -363,14 +392,14 @@ class SSViewer_BasicIteratorSupport implements TemplateIteratorProvider {
  * This extends SSViewer_Scope to mix in data on top of what the item provides. This can be "global"
  * data that is scope-independant (like BaseURL), or type-specific data that is layered on top cross-cut like
  * (like $FirstLast etc).
- * 
+ *
  * It's separate from SSViewer_Scope to keep that fairly complex code as clean as possible.
  *
  * @package framework
  * @subpackage view
  */
 class SSViewer_DataPresenter extends SSViewer_Scope {
-	
+
 	private static $globalProperties = null;
 	private static $iteratorProperties = null;
 
@@ -402,7 +431,7 @@ class SSViewer_DataPresenter extends SSViewer_Scope {
 			self::$iteratorProperties = array();
 			// Get all the exposed variables from all classes that implement the TemplateIteratorProvider interface
 			// //call non-statically
-			$this->createCallableArray(self::$iteratorProperties, "TemplateIteratorProvider", 
+			$this->createCallableArray(self::$iteratorProperties, "TemplateIteratorProvider",
 				"get_template_iterator_variables", true);
 		}
 
@@ -421,7 +450,7 @@ class SSViewer_DataPresenter extends SSViewer_Scope {
 			$exposedVariables = call_user_func(array($implementer, $variableMethod));
 
 			foreach($exposedVariables as $varName => $details) {
-				if (!is_array($details)) $details = array('method' => $details, 
+				if (!is_array($details)) $details = array('method' => $details,
 					'casting' => Config::inst()->get('ViewableData', 'default_cast', Config::FIRST_SET));
 
 				// If just a value (and not a key => value pair), use it for both key and value
@@ -443,7 +472,7 @@ class SSViewer_DataPresenter extends SSViewer_Scope {
 
 	/**
 	 * Get the injected value
-	 * 
+	 *
 	 * @param string $property Name of property
 	 * @param array $params
 	 * @param bool $cast If true, an object is always returned even if not an object.
@@ -519,6 +548,77 @@ class SSViewer_DataPresenter extends SSViewer_Scope {
 
 	}
 
+	/**
+	 * Store the current overlay (as it doesn't directly apply to the new scope
+	 * that's being pushed). We want to store the overlay against the next item
+	 * "up" in the stack (hence upIndex), rather than the current item, because
+	 * SSViewer_Scope::obj() has already been called and pushed the new item to
+	 * the stack by this point
+	 * @return SSViewer_Scope
+	 */
+	public function pushScope() {
+		$scope = parent::pushScope();
+		$upIndex = $this->getUpIndex();
+
+		if ($upIndex !== null) {
+			$itemStack = $this->getItemStack();
+			$itemStack[$upIndex][SSViewer_Scope::ITEM_OVERLAY] = $this->overlay;
+
+			$this->setItemStack($itemStack);
+			$this->overlay = array();
+		}
+
+		return $scope;
+	}
+
+	/**
+	 * Now that we're going to jump up an item in the item stack, we need to
+	 * restore the overlay that was previously stored against the next item "up"
+	 * in the stack from the current one
+	 * @return SSViewer_Scope
+	 */
+	public function popScope() {
+		$upIndex = $this->getUpIndex();
+
+		if ($upIndex !== null) {
+			$itemStack = $this->getItemStack();
+			$this->overlay = $itemStack[$this->getUpIndex()][SSViewer_Scope::ITEM_OVERLAY];
+		}
+
+		return parent::popScope();
+	}
+
+	/**
+	 * $Up and $Top need to restore the overlay from the parent and top-level
+	 * scope respectively.
+	 */
+	public function obj($name, $arguments = null, $forceReturnedObject = true, $cache = false, $cacheName = null) {
+		$overlayIndex = false;
+
+		switch($name) {
+			case 'Up':
+				$upIndex = $this->getUpIndex();
+				if ($upIndex === null) {
+					user_error('Up called when we\'re already at the top of the scope', E_USER_ERROR);
+				}
+
+				$overlayIndex = $upIndex; // Parent scope
+				break;
+			case 'Top':
+				$overlayIndex = 0; // Top-level scope
+				break;
+		}
+
+		if ($overlayIndex !== false) {
+			$itemStack = $this->getItemStack();
+			if (!$this->overlay && isset($itemStack[$overlayIndex][SSViewer_Scope::ITEM_OVERLAY])) {
+				$this->overlay = $itemStack[$overlayIndex][SSViewer_Scope::ITEM_OVERLAY];
+			}
+		}
+
+		return parent::obj($name, $arguments, $forceReturnedObject, $cache, $cacheName);
+	}
+
 	public function getObj($name, $arguments = null, $forceReturnedObject = true, $cache = false, $cacheName = null) {
 		$result = $this->getInjectedValue($name, (array)$arguments);
 		if($result) return $result['obj'];
@@ -530,7 +630,7 @@ class SSViewer_DataPresenter extends SSViewer_Scope {
 		$property = $arguments[0];  //the name of the public function being called
 
 		//the public function parameters in an array
-		if (isset($arguments[1]) && $arguments[1] != null) $params = $arguments[1]; 
+		if (isset($arguments[1]) && $arguments[1] != null) $params = $arguments[1];
 		else $params = array();
 
 		$val = $this->getInjectedValue($property, $params);
@@ -554,31 +654,31 @@ class SSViewer_DataPresenter extends SSViewer_Scope {
 
 /**
  * Parses a template file with an *.ss file extension.
- * 
- * In addition to a full template in the templates/ folder, a template in 
+ *
+ * In addition to a full template in the templates/ folder, a template in
  * templates/Content or templates/Layout will be rendered into $Content and
  * $Layout, respectively.
- * 
+ *
  * A single template can be parsed by multiple nested {@link SSViewer} instances
  * through $Layout/$Content placeholders, as well as <% include MyTemplateFile %> template commands.
- * 
+ *
  * <b>Themes</b>
- * 
+ *
  * See http://doc.silverstripe.org/themes and http://doc.silverstripe.org/themes:developing
- * 
+ *
  * <b>Caching</b>
  *
- * Compiled templates are cached via {@link SS_Cache}, usually on the filesystem.  
+ * Compiled templates are cached via {@link SS_Cache}, usually on the filesystem.
  * If you put ?flush=1 on your URL, it will force the template to be recompiled.
  *
  * @see http://doc.silverstripe.org/themes
  * @see http://doc.silverstripe.org/themes:developing
- * 
+ *
  * @package framework
  * @subpackage view
  */
 class SSViewer implements Flushable {
-	
+
 	/**
 	 * @config
 	 * @var boolean $source_file_comments
@@ -606,7 +706,7 @@ class SSViewer implements Flushable {
 		Deprecation::notice('4.0', 'Use the "SSViewer.source_file_comments" config setting instead');
 		Config::inst()->update('SSViewer', 'source_file_comments', $val);
 	}
-	
+
 	/**
 	 * @deprecated 4.0 Use the "SSViewer.source_file_comments" config setting instead
 	 * @return boolean
@@ -615,18 +715,18 @@ class SSViewer implements Flushable {
 		Deprecation::notice('4.0', 'Use the "SSViewer.source_file_comments" config setting instead');
 		return Config::inst()->get('SSViewer', 'source_file_comments');
 	}
-	
+
 	/**
 	 * @var array $chosenTemplates Associative array for the different
 	 * template containers: "main" and "Layout". Values are absolute file paths to *.ss files.
 	 */
 	private $chosenTemplates = array();
-	
+
 	/**
 	 * @var boolean
 	 */
 	protected $rewriteHashlinks = true;
-	
+
 	/**
 	 * @config
 	 * @var string The used "theme", which usually consists of templates, images and stylesheets.
@@ -638,7 +738,7 @@ class SSViewer implements Flushable {
 	 * @config
 	 * @var boolean Use the theme. Set to FALSE in order to disable themes,
 	 * which can be useful for scenarios where theme overrides are temporarily undesired,
-	 * such as an administrative interface separate from the website theme. 
+	 * such as an administrative interface separate from the website theme.
 	 * It retains the theme settings to be re-enabled, for example when a website content
 	 * needs to be rendered from within this administrative interface.
 	 */
@@ -656,7 +756,7 @@ class SSViewer implements Flushable {
 
 	/*
 	 * Default prepended cache key for partial caching
-	 * 
+	 *
 	 * @var string
 	 * @config
 	 */
@@ -684,25 +784,25 @@ class SSViewer implements Flushable {
 		}
 		return $viewer;
 	}
-	
+
 	/**
 	 * @deprecated 4.0 Use the "SSViewer.theme" config setting instead
-	 * @param string $theme The "base theme" name (without underscores). 
+	 * @param string $theme The "base theme" name (without underscores).
 	 */
 	public static function set_theme($theme) {
 		Deprecation::notice('4.0', 'Use the "SSViewer.theme" config setting instead');
 		Config::inst()->update('SSViewer', 'theme', $theme);
 	}
-	
+
 	/**
 	 * @deprecated 4.0 Use the "SSViewer.theme" config setting instead
-	 * @return string 
+	 * @return string
 	 */
 	public static function current_theme() {
 		Deprecation::notice('4.0', 'Use the "SSViewer.theme" config setting instead');
 		return Config::inst()->get('SSViewer', 'theme');
 	}
-	
+
 	/**
 	 * Returns the path to the theme folder
 	 *
@@ -758,7 +858,7 @@ class SSViewer implements Flushable {
 	public static function get_templates_by_class($className, $suffix = '', $baseClass = null) {
 		// Figure out the class name from the supplied context.
 		if(!is_string($className) || !class_exists($className)) {
-			throw new InvalidArgumentException('SSViewer::get_templates_by_class() expects a valid class name as ' . 
+			throw new InvalidArgumentException('SSViewer::get_templates_by_class() expects a valid class name as ' .
 				'its first parameter.');
 			return array();
 		}
@@ -778,7 +878,7 @@ class SSViewer implements Flushable {
 		}
 		return $templates;
 	}
-	
+
 	/**
 	 * @param string|array $templateList If passed as a string with .ss extension, used as the "main" template.
 	 *  If passed as an array, it can be used for template inheritance (first found template "wins").
@@ -788,7 +888,9 @@ class SSViewer implements Flushable {
 	 *  </code>
 	 */
 	public function __construct($templateList, TemplateParser $parser = null) {
-		$this->setParser($parser ?: Injector::inst()->get('SSTemplateParser'));
+		if ($parser) {
+			$this->setParser($parser);
+		}
 
 		if(!is_array($templateList) && substr((string) $templateList,-3) == '.ss') {
 			$this->chosenTemplates['main'] = $templateList;
@@ -832,6 +934,9 @@ class SSViewer implements Flushable {
 	 */
 	public function getParser()
 	{
+		if (!$this->parser) {
+			$this->setParser(Injector::inst()->get('SSTemplateParser'));
+		}
 		return $this->parser;
 	}
 
@@ -857,15 +962,15 @@ class SSViewer implements Flushable {
 
 		return false;
 	}
-	
+
 	/**
 	 * Set a global rendering option.
 	 *
 	 * The following options are available:
-	 *  - rewriteHashlinks: If true (the default), <a href="#..."> will be rewritten to contain the 
+	 *  - rewriteHashlinks: If true (the default), <a href="#..."> will be rewritten to contain the
 	 *    current URL.  This lets it play nicely with our <base> tag.
-	 *  - If rewriteHashlinks = 'php' then, a piece of PHP script will be inserted before the hash 
-	 *    links: "<?php echo $_SERVER['REQUEST_URI']; ?>".  This is useful if you're generating a 
+	 *  - If rewriteHashlinks = 'php' then, a piece of PHP script will be inserted before the hash
+	 *    links: "<?php echo $_SERVER['REQUEST_URI']; ?>".  This is useful if you're generating a
 	 *    page that will be saved to a .php file and may be accessed from different URLs.
 	 *
 	 * @deprecated 4.0 Use the "SSViewer.rewrite_hash_links" config setting instead
@@ -881,7 +986,7 @@ class SSViewer implements Flushable {
 			Config::inst()->update('SSViewer', $optionName, $optionVal);
 		}
 	}
-	
+
 	/**
  	 * @deprecated 4.0 Use the "SSViewer.rewrite_hash_links" config setting instead
  	 * @param string
@@ -910,7 +1015,7 @@ class SSViewer implements Flushable {
 			return SSViewer::$topLevel[sizeof(SSViewer::$topLevel)-1];
 		}
 	}
-	
+
 	/**
 	 * Call this to disable rewriting of <a href="#xxx"> links.  This is useful in Ajax applications.
 	 * It returns the SSViewer objects, so that you can call new SSViewer("X")->dontRewriteHashlinks()->process();
@@ -920,7 +1025,7 @@ class SSViewer implements Flushable {
 		Config::inst()->update('SSViewer', 'rewrite_hash_links', false);
 		return $this;
 	}
-	
+
 	public function exists() {
 		return $this->chosenTemplates;
 	}
@@ -948,7 +1053,7 @@ class SSViewer implements Flushable {
 			return $founds[0];
 		}
 	}
-	
+
 	/**
 	 * Clears all parsed template files in the cache folder.
 	 *
@@ -979,7 +1084,7 @@ class SSViewer implements Flushable {
 		if (!self::$cacheblock_cache_flushed || $force) {
 			$cache = SS_Cache::factory('cacheblock');
 			$backend = $cache->getBackend();
-			
+
 			if(
 				$backend instanceof Zend_Cache_Backend_ExtendedInterface
 				&& ($capabilities = $backend->getCapabilities())
@@ -990,7 +1095,7 @@ class SSViewer implements Flushable {
 				$cache->clean(Zend_Cache::CLEANING_MODE_ALL);
 			}
 
-			
+
 			self::$cacheblock_cache_flushed = true;
 		}
 	}
@@ -1064,14 +1169,14 @@ class SSViewer implements Flushable {
 	/**
 	 * The process() method handles the "meat" of the template processing.
 	 *
-	 * It takes care of caching the output (via {@link SS_Cache}), as well as 
-	 * replacing the special "$Content" and "$Layout" placeholders with their 
+	 * It takes care of caching the output (via {@link SS_Cache}), as well as
+	 * replacing the special "$Content" and "$Layout" placeholders with their
 	 * respective subtemplates.
 	 *
 	 * The method injects extra HTML in the header via {@link Requirements::includeInHTML()}.
-	 * 
+	 *
 	 * Note: You can call this method indirectly by {@link ViewableData->renderWith()}.
-	 * 
+	 *
 	 * @param ViewableData $item
 	 * @param array|null $arguments - arguments to an included template
 	 * @param Object $inheritedScope - the current scope of a parent template including a sub-template
@@ -1088,15 +1193,15 @@ class SSViewer implements Flushable {
 			$key = reset($keys);
 			$template = $this->chosenTemplates[$key];
 		}
-		
-		$cacheFile = TEMP_FOLDER . "/.cache" 
+
+		$cacheFile = TEMP_FOLDER . "/.cache"
 			. str_replace(array('\\','/',':'), '.', Director::makeRelative(realpath($template)));
 		$lastEdited = filemtime($template);
 
 		if(!file_exists($cacheFile) || filemtime($cacheFile) < $lastEdited) {
 			$content = file_get_contents($template);
 			$content = $this->parseTemplateContent($content, $template);
-			
+
 			$fh = fopen($cacheFile,'w');
 			fwrite($fh, $content);
 			fclose($fh);
@@ -1108,30 +1213,32 @@ class SSViewer implements Flushable {
 		// through $Content and $Layout placeholders.
 		foreach(array('Content', 'Layout') as $subtemplate) {
 			if(isset($this->chosenTemplates[$subtemplate])) {
-				$subtemplateViewer = new SSViewer($this->chosenTemplates[$subtemplate], $this->parser);
+				$subtemplateViewer = clone $this;
+				// Disable requirements - this will be handled by the parent template
 				$subtemplateViewer->includeRequirements(false);
-				$subtemplateViewer->setPartialCacheStore($this->getPartialCacheStore());
+				// The subtemplate is the only file we want to process, so set it as the "main" template file
+				$subtemplateViewer->chosenTemplates = array('main' => $this->chosenTemplates[$subtemplate]);
 
 				$underlay[$subtemplate] = $subtemplateViewer->process($item, $arguments);
 			}
 		}
 
 		$output = $this->includeGeneratedTemplate($cacheFile, $item, $arguments, $underlay, $inheritedScope);
-		
+
 		if($this->includeRequirements) {
 			$output = Requirements::includeInHTML($template, $output);
 		}
-		
+
 		array_pop(SSViewer::$topLevel);
 
 		// If we have our crazy base tag, then fix # links referencing the current page.
-		
+
 		$rewrite = Config::inst()->get('SSViewer', 'rewrite_hash_links');
 		if($this->rewriteHashlinks && $rewrite) {
 			if(strpos($output, '<base') !== false) {
 				if($rewrite === 'php') {
 					$thisURLRelativeToBase = "<?php echo Convert::raw2att(preg_replace(\"/^(\\\\/)+/\", \"/\", \$_SERVER['REQUEST_URI'])); ?>";
-				} else { 
+				} else {
 					$thisURLRelativeToBase = Convert::raw2att(preg_replace("/^(\\/)+/", "/", $_SERVER['REQUEST_URI']));
 				}
 
@@ -1145,7 +1252,7 @@ class SSViewer implements Flushable {
 	/**
 	 * Execute the given template, passing it the given data.
 	 * Used by the <% include %> template tag to process templates.
-	 * 
+	 *
 	 * @param string $template Template name
 	 * @param mixed $data Data context
 	 * @param array $arguments Additional arguments
@@ -1157,12 +1264,12 @@ class SSViewer implements Flushable {
 
 		return $v->process($data, $arguments, $scope);
 	}
-	
+
 	/**
 	 * Execute the evaluated string, passing it the given data.
 	 * Used by partial caching to evaluate custom cache keys expressed using
 	 * template expressions
-	 * 
+	 *
 	 * @param string $content Input string
 	 * @param mixed $data Data context
 	 * @param array $arguments Additional arguments
@@ -1171,12 +1278,12 @@ class SSViewer implements Flushable {
 	public static function execute_string($content, $data, $arguments = null) {
 		$v = SSViewer::fromString($content);
 		$v->includeRequirements(false);
-		
+
 		return $v->process($data, $arguments);
 	}
 
 	public function parseTemplateContent($content, $template="") {
-		return $this->parser->compileString(
+		return $this->getParser()->compileString(
 			$content,
 			$template,
 			Director::isDev() && Config::inst()->get('SSViewer', 'source_file_comments')
@@ -1190,7 +1297,7 @@ class SSViewer implements Flushable {
 	public function templates() {
 		return $this->chosenTemplates;
 	}
-	
+
 	/**
 	 * @param string $type "Layout" or "main"
 	 * @param string $file Full system path to the template file
@@ -1198,17 +1305,17 @@ class SSViewer implements Flushable {
 	public function setTemplateFile($type, $file) {
 		$this->chosenTemplates[$type] = $file;
 	}
-	
+
 	/**
 	 * Return an appropriate base tag for the given template.
 	 * It will be closed on an XHTML document, and unclosed on an HTML document.
-	 * 
+	 *
 	 * @param $contentGeneratedSoFar The content of the template generated so far; it should contain
 	 * the DOCTYPE declaration.
 	 */
 	public static function get_base_tag($contentGeneratedSoFar) {
 		$base = Director::absoluteBaseURL();
-		
+
 		// Is the document XHTML?
 		if(preg_match('/<!DOCTYPE[^>]+xhtml/i', $contentGeneratedSoFar)) {
 			return "<base href=\"$base\" />";
@@ -1231,21 +1338,24 @@ class SSViewer_FromString extends SSViewer {
 	 * @var bool
 	 */
 	private static $cache_template = true;
-	
+
 	/**
 	 * The template to use
 	 * @var string
 	 */
 	protected $content;
-	
+
 	/**
 	 * Indicates whether templates should be cached
 	 * @var bool
 	 */
 	protected $cacheTemplate;
-	
+
 	public function __construct($content, TemplateParser $parser = null) {
-		$this->setParser($parser ?: Injector::inst()->get('SSTemplateParser'));
+		if ($parser) {
+			$this->setParser($parser);
+		}
+
 		$this->content = $content;
 	}
 
@@ -1267,21 +1377,21 @@ class SSViewer_FromString extends SSViewer {
 		} else {
 			$cacheTemplate = Config::inst()->get('SSViewer_FromString', 'cache_template');
 		}
-		
+
 		if (!$cacheTemplate) {
 			unlink($cacheFile);
 		}
 
 		return $val;
 	}
-	
+
 	/**
 	 * @param boolean $cacheTemplate
 	 */
 	public function setCacheTemplate($cacheTemplate) {
 		$this->cacheTemplate = (bool) $cacheTemplate;
 	}
-	
+
 	/**
 	 * @return boolean
 	 */

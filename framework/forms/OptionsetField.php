@@ -53,10 +53,8 @@
 class OptionsetField extends DropdownField {
 
 	/**
-	 * @var Array
+	 * {@inheritdoc}
 	 */
-	protected $disabledItems = array();
-
 	public function Field($properties = array()) {
 		$source = $this->getSource();
 		$odd = 0;
@@ -64,6 +62,11 @@ class OptionsetField extends DropdownField {
 
 		if($source) {
 			foreach($source as $value => $title) {
+				// Ensure $title is safely cast
+				if ( !($title instanceof DBField) ) {
+					$title = DBField::create_field('Text', $title);
+				}
+
 				$itemID = $this->ID() . '_' . preg_replace('/[^a-zA-Z0-9]/', '', $value);
 				$odd = ($odd + 1) % 2;
 				$extraClass = $odd ? 'odd' : 'even';
@@ -85,39 +88,30 @@ class OptionsetField extends DropdownField {
 			'Options' => new ArrayList($options)
 		));
 
-		return $this->customise($properties)->renderWith(
-			$this->getTemplates()
-		);
-	}
-
-	public function performReadonlyTransformation() {
-		// Source and values are DataObject sets.
-		$field = $this->castedCopy('LookupField');
-		$field->setSource($this->getSource());
-		$field->setReadonly(true);
-
-		return $field;
+		return FormField::Field($properties);
 	}
 
 	/**
-	 * Mark certain elements as disabled,
-	 * regardless of the {@link setDisabled()} settings.
-	 *
-	 * @param array $items Collection of array keys, as defined in the $source array
+	 * {@inheritdoc}
 	 */
-	public function setDisabledItems($items) {
-		$this->disabledItems = $items;
-		return $this;
-	}
+	public function validate($validator) {
+		if (!$this->value) {
+			return true;
+		}
 
-	/**
-	 * @return Array
-	 */
-	public function getDisabledItems() {
-		return $this->disabledItems;
+		return parent::validate($validator);
 	}
 
 	public function ExtraOptions() {
 		return new ArrayList();
+	}
+	
+	public function getAttributes() {
+		$attributes = parent::getAttributes();
+		unset($attributes['name']);
+		unset($attributes['required']);
+		unset($attributes['role']);
+		
+		return $attributes;
 	}
 }
