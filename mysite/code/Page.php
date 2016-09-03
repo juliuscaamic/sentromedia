@@ -39,11 +39,10 @@ class Page_Controller extends ContentController {
 				'themes/reen/css/owl.carousel.css', 
 				'themes/reen/css/owl.transitions.css', 
 				'themes/reen/css/animate.min.css', 
-				'themes/reen/fonts/fontello.css', 
+				'themes/reen/fonts/google-fonts.css', 
 				'mailchimp/css/mailchimp.css'
 			)
 		);
-		Requirements::css('http://fonts.googleapis.com/css?family=Lato:400,900,300,700|Source+Sans+Pro:400,700,400italic,700italic');
 
 		Requirements::combine_files(
 			'script.js', 

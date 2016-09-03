@@ -117,7 +117,7 @@
 
 			<% if $ClassName == 'BlockTab' %>
 				<section id="circle-tabs">
-					<div class="container inner-top">
+					<div class="container">
 
 						<div class="row">
 							<div class="col-md-8 col-sm-10 center-block text-center">

@@ -141,5 +141,4 @@ class PageBlockBuilder_Page_Extension extends DataExtension {
 	public function canShowBlockBuilder() {
 		return true;
 	}
-
 }
