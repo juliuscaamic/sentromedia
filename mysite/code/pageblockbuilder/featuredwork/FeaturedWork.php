@@ -28,6 +28,13 @@ class FeaturedWork extends DataObject {
 	);
 
 	/**
+	 * Set default sort
+	 * 
+	 * @var string
+	 */
+	private static $default_sort = 'SortOrder';
+
+	/**
 	 * Get CMS fields
 	 * 
 	 * @return FieldList
