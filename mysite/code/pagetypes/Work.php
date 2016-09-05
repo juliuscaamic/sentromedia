@@ -50,7 +50,9 @@ class Work extends Blog {
 	 * @return DataList
 	 */
 	public function getBlogPosts() {
-		return WorkPage::get()->filter("ParentID", $this->ID);
+		return WorkPage::get()
+			->filter("ParentID", $this->ID)
+			->sort('SortOrder ASC');
 	}		
 }
 
