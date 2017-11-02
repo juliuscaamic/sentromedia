@@ -348,7 +348,7 @@
 			<% end_if %>
 
 			<% if $ClassName == 'BlockMap' %>
-				<section id="map" class="height-sm"></section>			
+				<section id="map" class="height-sm"></section>
 			<% end_if %>
 
 			<% if $ClassName == 'BlockContactForm' %>

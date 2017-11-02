@@ -3,3 +3,13 @@ silverstripe-cache/
 _ss_environment.php
 mysite/_config.php
 .htaccess
+
+.DS_Store
+
+cms.zip
+
+*.zip
+
+themes/reen/fonts/fontello.css
+
+themes/reen/fonts/fontello.css
